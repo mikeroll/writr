@@ -85,6 +85,7 @@
     <ClInclude Include="Text.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="TextEdit.h" />
+    <ClInclude Include="WritrDocument.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -93,6 +94,7 @@
     </ClCompile>
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="TextEdit.cpp" />
+    <ClCompile Include="WritrDocument.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TextEdit.rc" />

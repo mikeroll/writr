@@ -15,12 +15,23 @@ HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
-//MY global variable
-TextBox *TXT;
+// App data structure
+struct AppState {
+	TextBox *editor;
+	//HistoryCtl *history;
+};
+
+// Routine for retreiving state
+inline AppState* GetAppState(HWND hWnd)
+{
+    LONG_PTR ptr = GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    AppState *pState = reinterpret_cast<AppState *>(ptr);
+    return pState;
+}
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
-BOOL				InitInstance(HINSTANCE, int);
+BOOL				InitInstance(HINSTANCE, int, AppState *);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
@@ -34,18 +45,20 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
- 	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
-	TXT = new TextBox();
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_TEXTEDIT, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
+    // Initialize app data
+    AppState *pState = new AppState();
+    pState->editor = new TextBox();
+
 	// Perform application initialization:
-	if (!InitInstance (hInstance, nCmdShow))
+	if (!InitInstance (hInstance, nCmdShow, pState))
 	{
 		return FALSE;
 	}
@@ -64,8 +77,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	return (int) msg.wParam;
 }
-
-
 
 //
 //  FUNCTION: MyRegisterClass()
@@ -103,24 +114,35 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, AppState *pState)
 {
-   HWND hWnd;
+    // Initialize data struct
 
-   hInst = hInstance; // Store instance handle in our global variable
+    HWND hWnd;
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+    hInst = hInstance; // Store instance handle in our global variable
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    hWnd = CreateWindowEx(
+        0,
+        szWindowClass,
+        szTitle,
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
+        NULL,
+        NULL,
+        hInstance,
+        pState
+        );
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   return TRUE;
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
+
+    return TRUE;
 }
 
 //
@@ -139,24 +161,46 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 	
+
+    AppState *pState;
+
+    if (message == WM_NCCREATE)
+    {
+        CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
+        pState = reinterpret_cast<AppState *>(pCreate->lpCreateParams);
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
+    }
+    else
+    {
+        pState = GetAppState(hWnd);
+    }
+
+    TextBox *editor;
+    if (pState != NULL)
+    {
+        editor = pState->editor;
+    }
+    else
+        return -1;
+
 	switch (message)
 	{
 	case WM_RBUTTONDOWN:
 		break;
 	case WM_LBUTTONDOWN:
-		TXT->MouseDown(lParam);
-		TXT->ReDrawBox(hWnd);
+		editor->MouseDown(lParam);
+		editor->ReDrawBox(hWnd);
 		break;
 	case WM_LBUTTONUP:
-		TXT->MouseUp(lParam,hWnd);
+		editor->MouseUp(lParam,hWnd);
 		break;
 	case WM_CHAR:
-		TXT->KeyPress(hWnd,wParam);
+		editor->KeyPress(hWnd,wParam);
 		//InvalidateRect(hWnd,NULL,TRUE);//чтобы вызвать WM_PAINT
 		break;
 	case WM_KEYDOWN:
-		if (TXT->SystemKey(wParam,hWnd))
-			TXT->ReDrawBox(hWnd);
+		if (editor->SystemKey(wParam,hWnd))
+			editor->ReDrawBox(hWnd);
 		break;
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
@@ -176,18 +220,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		TXT->ReDrawBox(hWnd);
+		editor->ReDrawBox(hWnd);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_SIZE:
-		TXT->SetBox(lParam);
+		editor->SetBox(lParam);
 		break;
 	case WM_MOUSEWHEEL:
-		(GET_WHEEL_DELTA_WPARAM(wParam)>0) ? TXT->WheelUP() : TXT->WheelDN();
-		TXT->ReDrawBox(hWnd);
+		(GET_WHEEL_DELTA_WPARAM(wParam)>0) ? editor->WheelUP() : editor->WheelDN();
+		editor->ReDrawBox(hWnd);
 		break;
 	case WM_DESTROY:
-		//delete TXT;
+		delete editor;
 		PostQuitMessage(0);
 		break;
 	default:
@@ -215,7 +259,3 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return (INT_PTR)FALSE;
 }
-
-
-
-

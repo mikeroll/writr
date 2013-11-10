@@ -201,7 +201,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		editor->MouseUp(lParam,hWnd);
 		break;
 	case WM_CHAR:
-		editor->KeyPress(hWnd,wParam);
+		if (!(GetKeyState(VK_CONTROL) < 0))
+			editor->KeyPress(hWnd,wParam);
 		//InvalidateRect(hWnd,NULL,TRUE);//чтобы вызвать WM_PAINT
 		break;
 	case WM_KEYDOWN:
@@ -248,8 +249,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		editor->SetBox(lParam);
 		break;
 	case WM_MOUSEWHEEL:
-		(GET_WHEEL_DELTA_WPARAM(wParam)>0) ? editor->WheelUP() : editor->WheelDN();
-		editor->ReDrawBox(hWnd);
+		if (GetKeyState(VK_CONTROL) < 0)
+		{
+			(GET_WHEEL_DELTA_WPARAM(wParam)>0) ? editor->WheelUP() : editor->WheelDN();
+			editor->ReDrawBox(hWnd);
+		}		
 		break;
 	case WM_DESTROY:
 		delete editor;

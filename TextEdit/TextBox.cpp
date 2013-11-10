@@ -9,12 +9,19 @@ TextBox::TextBox()
 	MaxHght = 0;
 	CaretPos = 0;
 	text[0] = '\0';
+	font[0] = 0;
 	CountElements = 0;
 	DBLClicK = false;
 	Select = false;
 	Click = false;
 	MStart = {0,0};
 	MEnd = {0,0};
+	CurrentFont = 2;
+	Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
+	Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
+	Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
+	zoom = Font[CurrentFont].lfHeight;//don't write under Font[]!!!
+
 }
 
 
@@ -29,8 +36,10 @@ void TextBox::AddText(char ch)	//add one symbol
 		for (int i = CountElements; i >= CaretPos; i--)
 		{
 			text[i + 1] = text[i];
+			font[i + 1] = font[i];
 		}
 		text[CaretPos] = ch;
+		font[CaretPos] = CurrentFont;
 		CountElements++;
 		if (CaretPos<CountElements)
 			CaretPos++;
@@ -42,8 +51,9 @@ void TextBox::RemoveText()		// Delete (not Backspace) one symbol
 	for (int i = CaretPos; i<CountElements; i++)
 	{
 		text[i] = text[i+1];
+		font[i] = font[i + 1];
 	}
-	text[CountElements - 1] = ' ';
+	//text[CountElements - 1] =' ';
 	CountElements--;
 	
 }
@@ -58,6 +68,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 {
 	Point Curr = {0,0};
 	MaxHght = 0;
+	HFONT hFont;
 	SIZE s;
 	char CH[2];
 	CH[1] = '\0';
@@ -71,7 +82,11 @@ void TextBox::ReDrawBox(HWND hWnd)
 	for (int i = 0; i < CountElements; i++)
 	{
 		DestroyCaret();
-		CreateCar(hWnd);
+		Font[font[i]].lfHeight = zoom;
+		hFont = CreateFontIndirectW(&Font[font[i]]);
+		SelectObject(hdc,hFont);
+		GetTextExtentPoint(hdc, (LPCWSTR)"A", 1, &s);
+		CreateCar(hWnd, s.cy);
 		if (text[i] != '\r' && text[i] != '@')		//+ font, +image
 		{
 			if (text[i] == '_')
@@ -85,6 +100,10 @@ void TextBox::ReDrawBox(HWND hWnd)
 				s.cx *= 8;
 			if (MaxHght < s.cy)
 				MaxHght=s.cy;
+
+			//---becouse next letter eat some part of previous...
+			s.cx += 2;					//Warning: sync. with SelectOrSetCaret()
+			//---
 
 			if ((Curr.x+s.cx) < WALL)		//if within the window, then print, else -> \r
 			{
@@ -123,11 +142,12 @@ void TextBox::ReDrawBox(HWND hWnd)
 			MaxHght = 0;		//new line -> counter=0
 			Curr.x = 0;
 		}
+		DeleteObject(hFont);
 	}
 
 	if (CaretPos == CountElements)
 	{
-		if (Curr.x + 2 < WALL)
+		if (Curr.x + 2 < WALL)		//2 - caret's width
 			SetCaretPos(Curr.x,Curr.y);
 		else
 		{
@@ -135,12 +155,12 @@ void TextBox::ReDrawBox(HWND hWnd)
 				SetCaretPos(0,Curr.y+MaxHght);
 			else
 			{
-				GetTextExtentPoint(hdc, (LPCWSTR)"A", 1, &s);
+				GetTextExtentPoint(hdc, (LPCWSTR)"a", 1, &s);
 				SetCaretPos(0, Curr.y + s.cy);
 			}
 		}
 	}
-	ShowCaret(hWnd);
+	ShowCaret(hWnd);	
 	ReleaseDC(hWnd, hdc);
 
 }
@@ -169,16 +189,18 @@ void TextBox::KeyPress(HWND hWnd, WPARAM wParam)
 	//+ history
 }
 
-int TextBox::SystemKey(WPARAM wParam)
+int TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 {
 	int result = 1;		//for ReDraw'ing window
 	switch (wParam)
 	{
 	case VK_LEFT:
-		MoveCar('l');
+		MoveCar('l',hWnd);
+		result = 0;
 		break;
 	case VK_RIGHT:
-		MoveCar('r');
+		MoveCar('r',hWnd);
+		result = 0;
 		break;
 	case VK_DELETE:
 		if (!Select)
@@ -201,7 +223,7 @@ int TextBox::SystemKey(WPARAM wParam)
 	return result;
 }
 
-void TextBox::MoveCar(char dir)
+void TextBox::MoveCar(char dir, HWND hWnd)
 {
 	switch (dir)
 	{
@@ -222,15 +244,24 @@ void TextBox::MoveCar(char dir)
 	case 'd':
 		break;
 	}
+	if (Select)
+	{
+		Click = false;
+		Select = false;
+		SelectStart = 0;
+		SelectEnd = 0;
+		ReDrawBox(hWnd);
+	}
+	else
+		SelectOrSetCaret(hWnd);
 }
 
-void TextBox::CreateCar(HWND hWnd)
+void TextBox::CreateCar(HWND hWnd,int height)
 {
 	SIZE s;
 	HDC hdc = GetDC(hWnd);
-	GetTextExtentPoint(hdc, (LPCWSTR)"A", 1, &s);
 	ReleaseDC(hWnd, hdc);
-	CreateCaret(hWnd, NULL, 2, s.cy-2);	
+	CreateCaret(hWnd, NULL, 2, height);	
 }
 
 void TextBox::MouseDown(LPARAM lParam)
@@ -245,7 +276,7 @@ void TextBox::MouseDown(LPARAM lParam)
 
 void TextBox::MouseUp(LPARAM lParam,HWND hWnd)
 {
-	Click = false;
+	//Click = false;
 	MEnd.x = LOWORD(lParam);
 	MEnd.y = HIWORD(lParam);
 	if (MStart.x != MEnd.x || MStart.y != MEnd.y)
@@ -274,13 +305,13 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 	Point Curr = { 0, 0 };
 	MaxHght = 0;
 	SIZE s;
+	HFONT hFont;
 	char CH[2];
 	CH[1] = '\0';
 	r = { 0, 0, WALL, GROUND };
 	HDC hdc = GetDC(hWnd);
 	HideCaret(hWnd);
 	bool filling = false;
-	int c=0;
 
 	if (Select)		///if text selected
 	{
@@ -291,14 +322,17 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 
 	for (int i = 0; i < CountElements; i++)
 	{
-		if (i == 15)
-		{
-			c++;
-		}
 		DestroyCaret();
-		CreateCar(hWnd);
+		Font[font[i]].lfHeight = zoom;					//don't touch!  
+		hFont = CreateFontIndirectW(&Font[font[i]]);	//need for
+		SelectObject(hdc, hFont);						//caret position
+		GetTextExtentPoint(hdc, (LPCWSTR)"A", 1, &s);
+		CreateCar(hWnd, s.cy);
+		
 		if (text[i] != '\r' && text[i] != '@')		//+ font, +image
 		{
+
+
 			if (text[i] == '_')
 			{
 				CH[0] = ' ';
@@ -310,6 +344,10 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 				s.cx *= 8;
 			if (MaxHght < s.cy)
 				MaxHght = s.cy;
+
+			//---
+			s.cx += 2;		//Warning: sync. with ReDrawBox()
+			//---
 
 			if ((Curr.x + s.cx) < WALL)		//if within the window, then print, else -> \r
 			{
@@ -323,7 +361,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 					}
 				}
 				//if current point is end of selecting part, then filling->false
-				if ((Curr.x <= MEnd.x && MEnd.x < (Curr.x + s.cx)) && (Curr.y <= MEnd.y && MEnd.y < (Curr.y + MaxHght)))
+				if ( (Select || Click) && (Curr.x <= MEnd.x && MEnd.x < (Curr.x + s.cx)) && (Curr.y <= MEnd.y && MEnd.y < (Curr.y + MaxHght)))
 				{
 					SetCaretPos(Curr.x,Curr.y);
 					CaretPos = i;
@@ -332,7 +370,11 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 					break;
 				}
 				if (filling)
-					TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);
+				{	TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);	}	
+
+				//just for find CaretPos position(<-,->)
+				if ((!Click || Select) && CaretPos == i)
+					SetCaretPos(Curr.x,Curr.y);
 				Curr.x += s.cx;
 			}
 			else
@@ -342,12 +384,22 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 				Curr.x = 0;
 
 				if (filling)
+				{					
 					TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);
+				}	
+
+				//just for find CaretPos position(<-,->)
+				if ((!Click || Select) && CaretPos == i)
+					SetCaretPos(Curr.x, Curr.y);
 				Curr.x += s.cx;
 			}
 		}
 		else		//if '\r'
 		{
+			//just for find CaretPos position(<-,->)
+			if ((!Click || Select) && CaretPos == i)
+				SetCaretPos(Curr.x, Curr.y);
+			
 			if (MaxHght == 0)
 			{
 				GetTextExtentPoint(hdc, (LPCWSTR)"a", 1, &s);
@@ -357,13 +409,30 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 			MaxHght = 0;		//new line -> counter=0
 			Curr.x = 0;
 		}
+		DeleteObject(hFont);
 	}
 
-	if (SelectStart != 0 && SelectEnd == 0)
-		SelectEnd = CountElements;
+	if ((!Click || Select) && CaretPos == CountElements)		//just for find CaretPos position(<-,->)
+	{
+		if (Curr.x + 2 < WALL)		//2 - caret's width
+			SetCaretPos(Curr.x, Curr.y);
+		else
+		{
+			if (MaxHght != 0)
+				SetCaretPos(0, Curr.y + MaxHght);
+			else
+			{
+				GetTextExtentPoint(hdc, (LPCWSTR)"a", 1, &s);
+				SetCaretPos(0, Curr.y + s.cy);
+			}
+		}
+	}
+	
+	if (SelectEnd == 0)
+		SelectEnd = CountElements; //if selected part go trough the end of text
 
-	if (!Select)
-		ReDrawBox(hWnd);
+	//if (!Select)
+		//ReDrawBox(hWnd);
 	SetBkColor(hdc, BackColor);
 	SetTextColor(hdc,TextColor);
 	Click = false;
@@ -385,4 +454,20 @@ void TextBox::swap(Point *a, Point *b)
 		(*b).x = p.x;
 		(*b).y = p.y;
 	}	
+}
+
+void TextBox::WheelUP()
+{
+	if (zoom > -96)
+	{
+		zoom--;		//make it bigger
+	}
+}
+
+void TextBox::WheelDN()
+{
+	if (zoom < -8)
+	{
+		zoom++;		//make it smaller
+	}
 }

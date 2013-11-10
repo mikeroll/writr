@@ -155,7 +155,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		//InvalidateRect(hWnd,NULL,TRUE);//чтобы вызвать WM_PAINT
 		break;
 	case WM_KEYDOWN:
-		if (TXT->SystemKey(wParam))
+		if (TXT->SystemKey(wParam,hWnd))
 			TXT->ReDrawBox(hWnd);
 		break;
 	case WM_COMMAND:
@@ -182,8 +182,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE:
 		TXT->SetBox(lParam);
 		break;
+	case WM_MOUSEWHEEL:
+		(GET_WHEEL_DELTA_WPARAM(wParam)>0) ? TXT->WheelUP() : TXT->WheelDN();
+		TXT->ReDrawBox(hWnd);
+		break;
 	case WM_DESTROY:
-		delete TXT;
+		//delete TXT;
 		PostQuitMessage(0);
 		break;
 	default:

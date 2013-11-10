@@ -60,6 +60,8 @@ public:
 	void WheelUP();
 	void WheelDN();
 	int SetCurrentFont(BYTE f);
+	int SelectWord(HWND hWnd, LPARAM lParam);
+	int IsNormalChar(char ch);
 
 };
 

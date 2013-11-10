@@ -50,12 +50,11 @@ void TextBox::RemoveText()		// Delete (not Backspace) one symbol
 {
 	for (int i = CaretPos; i<CountElements; i++)
 	{
-		text[i] = text[i+1];
+		text[i] = text[i + 1];
 		font[i] = font[i + 1];
 	}
-	//text[CountElements - 1] =' ';
-	CountElements--;
-	
+	if (CaretPos!=CountElements)
+		CountElements--;	
 }
 
 void TextBox::SetBox(LPARAM lParam)
@@ -204,7 +203,7 @@ int TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 		break;
 	case VK_DELETE:
 		if (!Select)
-			RemoveText();
+		RemoveText();
 		else
 		{
 			CaretPos = SelectStart;
@@ -489,4 +488,43 @@ int TextBox::SetCurrentFont(BYTE f)
 		}
 	}
 	return result;		
+}
+
+int TextBox::SelectWord(HWND hWnd, LPARAM lParam)
+{
+	int start = 0, end = 0, result = 1;
+	//MouseDown(lParam);
+	/*int pos=CaretPos;
+
+	
+	if (IsNormalChar(text[pos]))		//if text[pos] is a letter
+	{
+		int j = pos;
+		//go to left
+		while (j>=0 && j<CountElements && IsNormalChar(text[j]))
+		{
+			start = j;
+			j--;
+		}
+		//go to right
+		while (j >= 0 && j<CountElements && IsNormalChar(text[j]))
+		{
+			end = j;
+			j++;
+		}
+		result = 0;				//all is ok: find word
+	}*/
+	return result;
+}
+
+int TextBox::IsNormalChar(char ch)
+{
+	int result=1;
+	char C[7] = {' ', ',', '.', '\r', '@', '_', '\0'};
+	for (int i = 0; i < 7; i++)
+	{
+		if (ch == C[i])
+			result = 0;
+	}
+	return result;
 }

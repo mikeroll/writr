@@ -188,6 +188,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
+	case WM_LBUTTONDBLCLK:
+		editor->SelectWord(hWnd, lParam);
+		break;
 	case WM_RBUTTONDOWN:
 		break;
 	case WM_LBUTTONDOWN:

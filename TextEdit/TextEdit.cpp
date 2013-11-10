@@ -221,13 +221,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DestroyWindow(hWnd);
 			break;
 		case ID_EDIT_ARIAL:
-			editor->SetCurrentFont(0);
+			if (editor->SetCurrentFont(0))
+				editor->ReDrawBox(hWnd);
 			break;
 		case ID_EDIT_TIMESNEWROMAN:
-			editor->SetCurrentFont(1);
+			if (editor->SetCurrentFont(1))
+				editor->ReDrawBox(hWnd);
 			break;
 		case ID_EDIT_KRISTENITC:
-			editor->SetCurrentFont(2);
+			if (editor->SetCurrentFont(2))
+				editor->ReDrawBox(hWnd);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);

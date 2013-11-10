@@ -29,9 +29,7 @@ private:
 	COLORREF SelectTextColor = RGB(30, 30, 30);
 
 	//----------------Fonts-------------------
-	LOGFONTW Font[3]; /*= { { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") },
-						{ -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") }, 
-						{ -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") } };*/
+	LOGFONTW Font[3];
 	BYTE CurrentFont;
 	LONG zoom;
 	//-----------------Flags------------------
@@ -40,7 +38,7 @@ private:
 	bool Select;
 	int SelectStart=0, SelectEnd=0;
 
-	Point MStart, MEnd;	//MouseDown -> start, MouseUp ->end
+	Point MStart, MEnd;	//MouseDown -> Mstart, MouseUp ->Mend
 
 
 public:
@@ -61,7 +59,7 @@ public:
 	void swap(Point *a, Point *b);
 	void WheelUP();
 	void WheelDN();
-	void SetCurrentFont(BYTE f);
+	int SetCurrentFont(BYTE f);
 
 };
 

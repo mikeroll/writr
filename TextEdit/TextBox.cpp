@@ -472,8 +472,21 @@ void TextBox::WheelDN()
 	}
 }
 
-void TextBox::SetCurrentFont(BYTE f)
+int TextBox::SetCurrentFont(BYTE f)
 {
+	int result = 0;		//not reDraw
 	if (f >= 0 && f < 3)
-		CurrentFont = f;
+	{
+		if (!Select)
+			CurrentFont = f;
+		else
+		{
+			for (int i = SelectStart; i < SelectEnd; i++)
+			{
+				font[i] = f;
+			}
+			result = 1;
+		}
+	}
+	return result;		
 }

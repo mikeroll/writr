@@ -61,6 +61,7 @@ public:
 	void swap(Point *a, Point *b);
 	void WheelUP();
 	void WheelDN();
+	void SetCurrentFont(BYTE f);
 
 };
 

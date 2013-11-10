@@ -20,7 +20,7 @@ TextBox::TextBox()
 	Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
 	Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
 	Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
-	zoom = Font[CurrentFont].lfHeight;//don't write under Font[]!!!
+	zoom = Font[CurrentFont].lfHeight;//don't write under the Font[]!!!
 
 }
 
@@ -470,4 +470,10 @@ void TextBox::WheelDN()
 	{
 		zoom++;		//make it smaller
 	}
+}
+
+void TextBox::SetCurrentFont(BYTE f)
+{
+	if (f >= 0 && f < 3)
+		CurrentFont = f;
 }

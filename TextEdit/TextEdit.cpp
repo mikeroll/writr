@@ -5,6 +5,7 @@
 #include "TextEdit.h"
 #include <string.h>
 #include "TextBox.h"
+#include "windowsx.h"
 
 
 #define MAX_LOADSTRING 100
@@ -34,6 +35,8 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int, AppState *);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+
+void				CreatePopup(HWND, LPARAM);
 
 
 
@@ -202,6 +205,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (editor->SystemKey(wParam,hWnd))
 			editor->ReDrawBox(hWnd);
 		break;
+	case WM_CONTEXTMENU:
+		CreatePopup(hWnd,lParam);
+		break;
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
@@ -213,6 +219,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
+			break;
+		case ID_EDIT_ARIAL:
+			editor->SetCurrentFont(0);
+			break;
+		case ID_EDIT_TIMESNEWROMAN:
+			editor->SetCurrentFont(1);
+			break;
+		case ID_EDIT_KRISTENITC:
+			editor->SetCurrentFont(2);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
@@ -258,4 +273,30 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+void CreatePopup(HWND hWnd, LPARAM lParam)
+{
+	//cursor's coordinates
+	POINT pt;
+	pt.x = GET_X_LPARAM(lParam);
+	pt.y = GET_Y_LPARAM(lParam);
+
+	//if call from keyboard
+	if (pt.x == -1 && pt.y == -1)
+	{
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		pt.x = rect.left + 5;
+		pt.y = rect.top + 5;
+	}
+
+	//load menu from resourses
+	HMENU hMenu, hPopupMenu;
+	hMenu = (LoadMenu(hInst, MAKEINTRESOURCE(IDC_TEXTEDIT)));
+	hPopupMenu = GetSubMenu(hMenu, 1);
+
+	//show menu
+	TrackPopupMenu(hPopupMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, NULL);
+	DestroyMenu(hMenu);
 }

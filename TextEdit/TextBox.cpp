@@ -282,7 +282,10 @@ void TextBox::MouseUp(LPARAM lParam,HWND hWnd)
 	{
 		Select = true;		
 	}
-	SelectOrSetCaret(hWnd);
+	if (!DBLClicK)
+		SelectOrSetCaret(hWnd);
+	else
+		DBLClicK = false;
 }
 
 void TextBox::MouseMove(LPARAM lParam, HWND hWnd)
@@ -312,7 +315,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 	HideCaret(hWnd);
 	bool filling = false;
 
-	if (Select)		///if text selected
+	if (Select || DBLClicK)		///if text selected
 	{
 		SetBkColor(hdc, SelectColor);
 		SetTextColor(hdc,SelectTextColor);
@@ -330,8 +333,13 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 		
 		if (text[i] != '\r' && text[i] != '@')		//+ font, +image
 		{
-
-
+			//----------------DoubleClick-------------
+			if (DBLClicK && i == SelectStart)
+				filling = true;
+			if (DBLClicK && i == SelectEnd)
+				filling = false;
+			//------------------------------------------
+			
 			if (text[i] == '_')
 			{
 				CH[0] = ' ';
@@ -359,6 +367,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 						filling = true;						
 					}
 				}
+				
 				//if current point is end of selecting part, then filling->false
 				if ( (Select || Click) && (Curr.x <= MEnd.x && MEnd.x < (Curr.x + s.cx)) && (Curr.y <= MEnd.y && MEnd.y < (Curr.y + MaxHght)))
 				{
@@ -368,12 +377,14 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 					filling = false;
 					break;
 				}
-				if (filling)
-				{	TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);	}	
 
 				//just for find CaretPos position(<-,->)
 				if ((!Click || Select) && CaretPos == i)
-					SetCaretPos(Curr.x,Curr.y);
+					SetCaretPos(Curr.x, Curr.y);
+
+				if (filling)
+				{	TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);	}			
+
 				Curr.x += s.cx;
 			}
 			else
@@ -430,8 +441,8 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 	if (SelectEnd == 0)
 		SelectEnd = CountElements; //if selected part go trough the end of text
 
-	//if (!Select)
-		//ReDrawBox(hWnd);
+	if (DBLClicK)
+		Select = true;
 	SetBkColor(hdc, BackColor);
 	SetTextColor(hdc,TextColor);
 	Click = false;
@@ -487,15 +498,14 @@ int TextBox::SetCurrentFont(BYTE f)
 			result = 1;
 		}
 	}
+	SelectStart = 0;
+	SelectEnd = 0;
 	return result;		
 }
 
-int TextBox::SelectWord(HWND hWnd, LPARAM lParam)
+void TextBox::SelectWord(HWND hWnd)
 {
-	int start = 0, end = 0, result = 1;
-	//MouseDown(lParam);
-	/*int pos=CaretPos;
-
+	int pos=CaretPos;
 	
 	if (IsNormalChar(text[pos]))		//if text[pos] is a letter
 	{
@@ -503,18 +513,20 @@ int TextBox::SelectWord(HWND hWnd, LPARAM lParam)
 		//go to left
 		while (j>=0 && j<CountElements && IsNormalChar(text[j]))
 		{
-			start = j;
+			SelectStart = j;
 			j--;
 		}
 		//go to right
+		j = pos;
 		while (j >= 0 && j<CountElements && IsNormalChar(text[j]))
 		{
-			end = j;
+			SelectEnd = j;
 			j++;
 		}
-		result = 0;				//all is ok: find word
-	}*/
-	return result;
+		SelectEnd++;
+		DBLClicK = true;
+		SelectOrSetCaret(hWnd);
+	}
 }
 
 int TextBox::IsNormalChar(char ch)

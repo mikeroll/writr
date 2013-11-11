@@ -18,7 +18,7 @@ TextBox::TextBox()
 	Click = false;
 	MStart = {0,0};
 	MEnd = {0,0};
-	CurrentFont = 2;
+	CurrentFont = 0;
 	Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
 	Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
 	Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
@@ -71,7 +71,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 	MaxHght = 0;
 	HFONT hFont;
 	SIZE s;
-	char CH[2];
+	TCHAR CH[2];
 	CH[1] = '\0';
 	r = {0,0,WALL,GROUND};
 	HDC hdc = GetDC(hWnd);
@@ -86,7 +86,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 		Font[font[i]].lfHeight = zoom;
 		hFont = CreateFontIndirectW(&Font[font[i]]);
 		SelectObject(hdc,hFont);
-		GetTextExtentPoint(hdc, (LPCWSTR)"A", 1, &s);
+		GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
 		CreateCar(hWnd, s.cy);
 		if (text[i] != '\r' && text[i] != '@')		//+ font, +image
 		{
@@ -96,7 +96,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 			}
 			else 
 				CH[0] = text[i];
-			GetTextExtentPoint(hdc, (LPCWSTR)CH, 1, &s);		//get i-char size
+			GetTextExtentPoint(hdc, (LPCTSTR)CH, 1, &s);		//get i-char size
 			if (text[i] == '_')
 				s.cx *= 8;
 			if (MaxHght < s.cy)
@@ -111,7 +111,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 				if (CaretPos==i)		//Set Caret
 				{	SetCaretPos(Curr.x, Curr.y);  }
 
-				TextOutA(hdc, Curr.x,Curr.y,(LPCSTR)CH,1);
+				TextOut(hdc, Curr.x,Curr.y, CH, 1);
 				Curr.x += s.cx;
 			}
 			else
@@ -123,7 +123,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 				if (CaretPos == i)		//Set Caret
 				{	SetCaretPos(Curr.x, Curr.y);	}
 
-				TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);
+				TextOut(hdc, Curr.x, Curr.y, CH, 1);
 				Curr.x += s.cx;
 			}
 		}
@@ -136,7 +136,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 
 			if (MaxHght == 0)
 			{
-				GetTextExtentPoint(hdc, (LPCWSTR)"a", 1, &s);
+				GetTextExtentPoint(hdc, (LPCTSTR)"a", 1, &s);
 				MaxHght = s.cy;
 			}
 			Curr.y += MaxHght;
@@ -156,7 +156,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 				SetCaretPos(0,Curr.y+MaxHght);
 			else
 			{
-				GetTextExtentPoint(hdc, (LPCWSTR)"a", 1, &s);
+				GetTextExtentPoint(hdc, (LPCTSTR)"a", 1, &s);
 				SetCaretPos(0, Curr.y + s.cy);
 			}
 		}
@@ -310,7 +310,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 	MaxHght = 0;
 	SIZE s;
 	HFONT hFont;
-	char CH[2];
+	TCHAR CH[2];
 	CH[1] = '\0';
 	r = { 0, 0, WALL, GROUND };
 	HDC hdc = GetDC(hWnd);
@@ -330,7 +330,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 		Font[font[i]].lfHeight = zoom;					//don't touch!  
 		hFont = CreateFontIndirectW(&Font[font[i]]);	//need for
 		SelectObject(hdc, hFont);						//caret position
-		GetTextExtentPoint(hdc, (LPCWSTR)"A", 1, &s);
+		GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
 		CreateCar(hWnd, s.cy);
 		
 		//----------------DoubleClick-------------
@@ -348,7 +348,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 			}
 			else
 				CH[0] = text[i];
-			GetTextExtentPoint(hdc, (LPCWSTR)CH, 1, &s);		//get i-char size
+			GetTextExtentPoint(hdc, (LPCTSTR)CH, 1, &s);		//get i-char size
 			if (text[i] == '_')
 				s.cx *= 8;
 			if (MaxHght < s.cy)
@@ -385,7 +385,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 					SetCaretPos(Curr.x, Curr.y);
 
 				if (filling)
-				{	TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);	}			
+				{	TextOut(hdc, Curr.x, Curr.y, (LPCTSTR)CH, 1);	}			
 
 				Curr.x += s.cx;
 			}
@@ -397,7 +397,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 
 				if (filling)
 				{					
-					TextOutA(hdc, Curr.x, Curr.y, (LPCSTR)CH, 1);
+					TextOut(hdc, Curr.x, Curr.y, (LPCTSTR)CH, 1);
 				}	
 
 				//just for find CaretPos position(<-,->)
@@ -414,7 +414,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 			
 			if (MaxHght == 0)
 			{
-				GetTextExtentPoint(hdc, (LPCWSTR)"a", 1, &s);
+				GetTextExtentPoint(hdc, (LPCTSTR)"a", 1, &s);
 				MaxHght = s.cy;
 			}
 			Curr.y += MaxHght;
@@ -434,7 +434,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 				SetCaretPos(0, Curr.y + MaxHght);
 			else
 			{
-				GetTextExtentPoint(hdc, (LPCWSTR)"a", 1, &s);
+				GetTextExtentPoint(hdc, (LPCTSTR)"a", 1, &s);
 				SetCaretPos(0, Curr.y + s.cy);
 			}
 		}
@@ -531,14 +531,19 @@ void TextBox::SelectWord(HWND hWnd)
 	}
 }
 
-int TextBox::IsNormalChar(char ch)
+int TextBox::IsNormalChar(TCHAR ch)
 {
 	int result=1;
-	char C[7] = {' ', ',', '.', '\r', '@', '_', '\0'};
+	TCHAR C[7] = {' ', ',', '.', '\r', '@', '_', '\0'};
 	for (int i = 0; i < 7; i++)
 	{
 		if (ch == C[i])
 			result = 0;
 	}
 	return result;
+}
+
+UINT TextBox::GetLength()
+{
+    return (UINT)CountElements;
 }

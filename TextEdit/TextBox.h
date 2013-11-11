@@ -10,7 +10,7 @@ private:
 	};
 	//------------------Main block---------
 	static const int MAX_LEN_TEXT=2000;
-	char text[MAX_LEN_TEXT];
+	TCHAR text[MAX_LEN_TEXT];
 	//Timg image[MAX_LEN_TEXT];
 	BYTE font[MAX_LEN_TEXT];
 	int CaretPos;
@@ -61,7 +61,8 @@ public:
 	void WheelDN();
 	int SetCurrentFont(BYTE f);
 	void SelectWord(HWND hWnd);
-	int IsNormalChar(char ch);
+	int IsNormalChar(TCHAR ch);
 
+    UINT GetLength();
 };
 

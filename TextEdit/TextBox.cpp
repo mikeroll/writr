@@ -541,7 +541,17 @@ int TextBox::IsNormalChar(TCHAR ch)
 	return result;
 }
 
-UINT TextBox::GetLength()
+UINT    TextBox::GetLength()
 {
-    return (UINT)CountElements;
+    return (UINT)(this->CountElements);
+}
+
+LPTSTR  TextBox::GetTextPtr()
+{
+    return this->text;
+}
+
+PBYTE   TextBox::GetFontPtr()
+{
+    return this->font;
 }

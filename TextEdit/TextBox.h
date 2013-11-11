@@ -63,6 +63,8 @@ public:
 	void SelectWord(HWND hWnd);
 	int IsNormalChar(TCHAR ch);
 
-    UINT GetLength();
+    UINT    GetLength();
+    LPTSTR  GetTextPtr();
+    PBYTE   GetFontPtr();
 };
 

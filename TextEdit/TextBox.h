@@ -24,8 +24,8 @@ private:
 
 	//------------------Color-------------------
 	COLORREF SelectColor = RGB(78, 221, 110);
-	COLORREF BackColor = RGB(67, 78, 84);
-	COLORREF TextColor = RGB(200, 200, 200);
+	//COLORREF BackColor = RGB(67, 78, 84);
+	COLORREF TextColor = RGB(220, 220, 220);
 	COLORREF SelectTextColor = RGB(30, 30, 30);
 
 	//----------------Fonts-------------------

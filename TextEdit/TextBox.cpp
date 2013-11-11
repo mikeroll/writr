@@ -11,6 +11,8 @@ TextBox::TextBox()
 	text[0] = '\0';
 	font[0] = 0;
 	CountElements = 0;
+	SelectStart = 0;
+	SelectEnd = 0;
 	DBLClicK = false;
 	Select = false;
 	Click = false;
@@ -73,9 +75,9 @@ void TextBox::ReDrawBox(HWND hWnd)
 	CH[1] = '\0';
 	r = {0,0,WALL,GROUND};
 	HDC hdc = GetDC(hWnd);
-	HideCaret(hWnd);
-	FillRect(hdc, &r, (HBRUSH)(COLOR_3DHILIGHT));
-	SetBkColor(hdc,BackColor);
+	HideCaret(hWnd);					
+	SetBkMode(hdc, TRANSPARENT);
+	FillRect(hdc, &r, (HBRUSH)(COLOR_3DHIGHLIGHT));		
 	SetTextColor(hdc,TextColor);
 	
 	for (int i = 0; i < CountElements; i++)
@@ -298,7 +300,7 @@ void TextBox::MouseMove(LPARAM lParam, HWND hWnd)
 		{
 			Select = true;
 		}
-		SelectOrSetCaret(hWnd);
+		//SelectOrSetCaret(hWnd);
 	}
 }
 
@@ -331,15 +333,15 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 		GetTextExtentPoint(hdc, (LPCWSTR)"A", 1, &s);
 		CreateCar(hWnd, s.cy);
 		
+		//----------------DoubleClick-------------
+		if (DBLClicK && i == SelectStart)
+			filling = true;
+		if (DBLClicK && i == SelectEnd)
+			filling = false;
+		//------------------------------------------
+		
 		if (text[i] != '\r' && text[i] != '@')		//+ font, +image
-		{
-			//----------------DoubleClick-------------
-			if (DBLClicK && i == SelectStart)
-				filling = true;
-			if (DBLClicK && i == SelectEnd)
-				filling = false;
-			//------------------------------------------
-			
+		{			
 			if (text[i] == '_')
 			{
 				CH[0] = ' ';
@@ -443,7 +445,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 
 	if (DBLClicK)
 		Select = true;
-	SetBkColor(hdc, BackColor);
+//	SetBkColor(hdc, BackColor);
 	SetTextColor(hdc,TextColor);
 	Click = false;
 	ShowCaret(hWnd);

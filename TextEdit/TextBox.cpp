@@ -109,7 +109,7 @@ VOID TextBox::ReDrawBox(HWND hWnd)
 
             if ((Curr.x+s.cx) < wall)       //if within the window, then print, else -> \r
             {
-                if (caretPos == i           //Set Caret
+                if (caretPos == i)           //Set Caret
                 {	SetCaretPos(Curr.x, Curr.y);  }
 
                 TextOut(hdc, Curr.x, Curr.y, CH, 1);
@@ -192,7 +192,7 @@ VOID TextBox::KeyPress(HWND hWnd, WPARAM wParam)
 
 BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 {
-    BOOL redraw = 1;        //for ReDraw'ing window
+    BOOL redraw = true;        //for ReDraw'ing window
     switch (wParam)
     {
     case VK_LEFT:
@@ -498,12 +498,12 @@ BOOL TextBox::SetCurrentFont(BYTE f)
             {
                 font[i] = f;
             }
-            redraw = 1;
+            redraw = true;
         }
     }
     selectStart = 0;
     selectEnd = 0;
-    return redraw;		
+    return redraw;
 }
 
 VOID TextBox::SelectWord(HWND hWnd)

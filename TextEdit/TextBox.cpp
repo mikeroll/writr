@@ -76,8 +76,9 @@ void TextBox::ReDrawBox(HWND hWnd)
 	r = {0,0,WALL,GROUND};
 	HDC hdc = GetDC(hWnd);
 	HideCaret(hWnd);					
+	//SetBkColor(hdc,BackColor);
 	SetBkMode(hdc, TRANSPARENT);
-	FillRect(hdc, &r, (HBRUSH)(COLOR_3DHIGHLIGHT));		
+	FillRect(hdc, &r, (HBRUSH)(COLOR_WINDOW));		
 	SetTextColor(hdc,TextColor);
 	
 	for (int i = 0; i < CountElements; i++)
@@ -193,6 +194,14 @@ void TextBox::KeyPress(HWND hWnd, WPARAM wParam)
 int TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 {
 	int result = 1;		//for ReDraw'ing window
+	if ((GetKeyState(VK_CONTROL) < 0) && (LOWORD(wParam) == 0x41))		//Ctrl+A
+	{
+		SelectStart = 0;
+		SelectEnd = CountElements;
+		DBLClicK = true;
+		SelectOrSetCaret(hWnd);
+		result=0;
+	}
 	switch (wParam)
 	{
 	case VK_LEFT:
@@ -259,7 +268,6 @@ void TextBox::MoveCar(char dir, HWND hWnd)
 
 void TextBox::CreateCar(HWND hWnd,int height)
 {
-	SIZE s;
 	HDC hdc = GetDC(hWnd);
 	ReleaseDC(hWnd, hdc);
 	CreateCaret(hWnd, NULL, 2, height);	
@@ -270,6 +278,7 @@ void TextBox::MouseDown(LPARAM lParam)
 	MStart.x = LOWORD(lParam);
 	MStart.y = HIWORD(lParam);
 	Click = true;
+	DBLClicK = false;
 	Select = false;
 	SelectStart = 0;
 	SelectEnd = 0;

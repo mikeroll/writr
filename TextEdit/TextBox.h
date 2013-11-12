@@ -24,9 +24,9 @@ private:
 
 	//------------------Color-------------------
 	COLORREF SelectColor = RGB(78, 221, 110);
-	//COLORREF BackColor = RGB(67, 78, 84);
-	COLORREF TextColor = RGB(220, 220, 220);
-	COLORREF SelectTextColor = RGB(30, 30, 30);
+	//COLORREF BackColor = COLOR_WINDOW;//RGB(67, 78, 84);
+	COLORREF TextColor = COLOR_WINDOWTEXT;//RGB(220, 220, 220);
+	COLORREF SelectTextColor = RGB(255, 255, 255);
 
 	//----------------Fonts-------------------
 	LOGFONTW Font[3];

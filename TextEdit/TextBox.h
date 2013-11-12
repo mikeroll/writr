@@ -3,18 +3,18 @@ class TextBox
 {
 private:
 
-    struct Point
-    {
-        int x;
-        int y;
-    };
+	struct Point
+	{
+		int x;
+		int y;
+	};
 
 
     // Client Rect
 
     WORD wall;      //right edge of the window
     WORD ground;    //bottom edge of the window
-    RECT r;
+	RECT r;	
 
 
     //Text and formatting
@@ -44,21 +44,21 @@ private:
 
     // Color
 
-    COLORREF SelectColor = RGB(78, 221, 110);
-    COLORREF BackColor = RGB(67, 78, 84);
-    COLORREF TextColor = RGB(200, 200, 200);
-    COLORREF SelectTextColor = RGB(30, 30, 30);
+	COLORREF SelectColor = RGB(78, 221, 110);
+	//COLORREF BackColor = RGB(67, 78, 84);
+	COLORREF TextColor = RGB(220, 220, 220);
+	COLORREF SelectTextColor = RGB(30, 30, 30);
 
 
     // Fonts
 
     LOGFONT Font[3];
-    BYTE CurrentFont;
-    LONG zoom;
+	BYTE CurrentFont;
+	LONG zoom;
 
 public:
-    TextBox();
-    ~TextBox();
+	TextBox();
+	~TextBox();
     VOID InsertChar(char ch);
     VOID RemoveChar();
 

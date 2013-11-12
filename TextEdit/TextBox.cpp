@@ -76,9 +76,9 @@ VOID TextBox::ReDrawBox(HWND hWnd)
     r = { 0, 0, wall, ground};
     HDC hdc = GetDC(hWnd);
     HideCaret(hWnd);
-    FillRect(hdc, &r, (HBRUSH)(COLOR_3DHILIGHT));
-    SetBkColor(hdc, BackColor);
-    SetTextColor(hdc, TextColor);
+    SetBkMode(hdc, TRANSPARENT);
+    FillRect(hdc, &r, (HBRUSH)(COLOR_3DHIGHLIGHT));		
+    SetTextColor(hdc,TextColor);
     
     for (UINT i = 0; i < length; i++)
     {
@@ -162,7 +162,7 @@ VOID TextBox::ReDrawBox(HWND hWnd)
             }
         }
     }
-    ShowCaret(hWnd);
+    ShowCaret(hWnd);	
     ReleaseDC(hWnd, hdc);
 }
 
@@ -300,7 +300,7 @@ VOID TextBox::MouseMove(LPARAM lParam, HWND hWnd)
         {
             isSelected = true;
         }
-        SelectOrSetCaret(hWnd);
+        //SelectOrSetCaret(hWnd);
     }
 }
 
@@ -333,15 +333,15 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
         CreateCar(hWnd, s.cy);
         
-        if (text[i] != '\r' && text[i] != '@')          //+ font, +image
-        {
-            //----------------DoubleClick-------------
-            if (isDblClicked && i == selectStart)
-                filling = true;
-            if (isDblClicked && i == selectEnd)
-                filling = false;
-            //------------------------------------------
+        //----------------DoubleClick-------------
+        if (isDblClicked && i == selectStart)
+            filling = true;
+        if (isDblClicked && i == selectEnd)
+            filling = false;
+        //------------------------------------------
             
+        if (text[i] != '\r' && text[i] != '@')		//+ font, +image
+        {			
             if (text[i] == '_')
             {
                 CH[0] = ' ';
@@ -366,7 +366,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
                     if (isSelected)
                     {
                         selectStart = i;
-                        filling = true;
+                        filling = true;						
                     }
                 }
                 
@@ -446,7 +446,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
 
     if (isDblClicked)
         isSelected = true;
-    SetBkColor(hdc, BackColor);
+    // SetBkColor(hdc, BackColor);
     SetTextColor(hdc,TextColor);
     isClicked = false;
     ShowCaret(hWnd);

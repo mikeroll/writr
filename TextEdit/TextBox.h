@@ -63,6 +63,9 @@ public:
 	void SelectWord(HWND hWnd);
 	int IsNormalChar(TCHAR ch);
 
-    UINT GetLength();
+	inline UINT		GetLength()  { return CountElements; }
+    inline UINT     SetLength(UINT n) { CountElements = n; text[n] = (TCHAR)0; return CountElements; }
+	inline LPTSTR	GetTextPtr() { return text; }
+	inline PBYTE	GetFontPtr() { return font; }
 };
 

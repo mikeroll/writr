@@ -2,19 +2,22 @@
 //
 
 #include "stdafx.h"
-#include "TextEdit.h"
 #include <string.h>
+#include <windowsx.h>
+
+#include "TextEdit.h"
+
 #include "TextBox.h"
-#include "windowsx.h"
+#include "WritrDocument.h"
 
 
 #define MAX_LOADSTRING 100
 
 
 // Global Variables:
-HINSTANCE hInst;								// current instance
-TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
-TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+HINSTANCE hInst;                                // current instance
+TCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
+TCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 // App data structure
 struct AppState {
@@ -31,12 +34,12 @@ inline AppState* GetAppState(HWND hWnd)
 }
 
 // Forward declarations of functions included in this code module:
-ATOM				MyRegisterClass(HINSTANCE hInstance);
-BOOL				InitInstance(HINSTANCE, int, AppState *);
-LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+ATOM                MyRegisterClass(HINSTANCE hInstance);
+BOOL                InitInstance(HINSTANCE, int, AppState *);
+LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-void				CreatePopup(HWND, LPARAM);
+void    CreatePopup(HWND, LPARAM);
 
 
 
@@ -249,12 +252,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         EndPaint(hWnd, &ps);
         break;
     case WM_SIZE:
-        editor->SetBox(lParam);
+        editor->ResizeBox(lParam);
         break;
     case WM_MOUSEWHEEL:
         if (GetKeyState(VK_CONTROL) < 0)
         {
-            (GET_WHEEL_DELTA_WPARAM(wParam)>0) ? editor->WheelUP() : editor->WheelDN();
+            if (GET_WHEEL_DELTA_WPARAM(wParam)>0)
+                editor->ZoomIn();
+            else
+                editor->ZoomOut();
             editor->ReDrawBox(hWnd);
         }		
         break;

@@ -198,14 +198,15 @@ int TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 	{
 		SelectStart = 0;
 		SelectEnd = CountElements;
-		DBLClicK = true;
+		DBLClicK = true;		//just becouse work as DBLClicK
 		SelectOrSetCaret(hWnd);
 		result=0;
 	}
+
 	switch (wParam)
 	{
 	case VK_LEFT:
-		MoveCar('l',hWnd);
+		MoveCar('l', hWnd);
 		result = 0;
 		break;
 	case VK_RIGHT:
@@ -214,7 +215,7 @@ int TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 		break;
 	case VK_DELETE:
 		if (!Select)
-		RemoveText();
+			RemoveText();
 		else
 		{
 			CaretPos = SelectStart;
@@ -223,6 +224,7 @@ int TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 				RemoveText();
 			}
 			Select = false;
+			DBLClicK = false;
 			SelectStart = 0;
 			SelectEnd = 0;
 		}
@@ -329,8 +331,8 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 	if (Select || DBLClicK)		///if text selected
 	{
 		SetBkColor(hdc, SelectColor);
-		SetTextColor(hdc,SelectTextColor);
-		swap(&MStart,&MEnd);		//if necessary
+		SetTextColor(hdc, SelectTextColor);
+		swap(&MStart, &MEnd);		//if necessary
 	}
 
 	for (int i = 0; i < CountElements; i++)
@@ -341,16 +343,16 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 		SelectObject(hdc, hFont);						//caret position
 		GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
 		CreateCar(hWnd, s.cy);
-		
+
 		//----------------DoubleClick-------------
 		if (DBLClicK && i == SelectStart)
 			filling = true;
 		if (DBLClicK && i == SelectEnd)
 			filling = false;
 		//------------------------------------------
-		
+
 		if (text[i] != '\r' && text[i] != '@')		//+ font, +image
-		{			
+		{
 			if (text[i] == '_')
 			{
 				CH[0] = ' ';
@@ -375,14 +377,14 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 					if (Select)
 					{
 						SelectStart = i;
-						filling = true;						
+						filling = true;
 					}
 				}
-				
+
 				//if current point is end of selecting part, then filling->false
-				if ( (Select || Click) && (Curr.x <= MEnd.x && MEnd.x < (Curr.x + s.cx)) && (Curr.y <= MEnd.y && MEnd.y < (Curr.y + MaxHght)))
+				if ((Select || Click) && (Curr.x <= MEnd.x && MEnd.x < (Curr.x + s.cx)) && (Curr.y <= MEnd.y && MEnd.y < (Curr.y + MaxHght)))
 				{
-					SetCaretPos(Curr.x,Curr.y);
+					SetCaretPos(Curr.x, Curr.y);
 					CaretPos = i;
 					SelectEnd = i;
 					filling = false;
@@ -394,7 +396,9 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 					SetCaretPos(Curr.x, Curr.y);
 
 				if (filling)
-				{	TextOut(hdc, Curr.x, Curr.y, (LPCTSTR)CH, 1);	}			
+				{
+					TextOut(hdc, Curr.x, Curr.y, (LPCTSTR)CH, 1);
+				}
 
 				Curr.x += s.cx;
 			}
@@ -405,9 +409,9 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 				Curr.x = 0;
 
 				if (filling)
-				{					
+				{
 					TextOut(hdc, Curr.x, Curr.y, (LPCTSTR)CH, 1);
-				}	
+				}
 
 				//just for find CaretPos position(<-,->)
 				if ((!Click || Select) && CaretPos == i)
@@ -420,7 +424,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 			//just for find CaretPos position(<-,->)
 			if ((!Click || Select) && CaretPos == i)
 				SetCaretPos(Curr.x, Curr.y);
-			
+
 			if (MaxHght == 0)
 			{
 				GetTextExtentPoint(hdc, (LPCTSTR)"a", 1, &s);
@@ -448,9 +452,14 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 			}
 		}
 	}
-	
-	if (SelectEnd == 0)
+
+	if ((Click || Select || DBLClicK) && (SelectEnd == 0))
+	{
 		SelectEnd = CountElements; //if selected part go trough the end of text
+		CaretPos = SelectEnd;
+		SetCaretPos(Curr.x,Curr.y);
+	}
+		
 
 	if (DBLClicK)
 		Select = true;

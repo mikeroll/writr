@@ -43,6 +43,8 @@ VOID TextBox::InsertChar(char ch)
             text[i + 1] = text[i];
             font[i + 1] = font[i];
         }
+        text[1] = text[0];
+        font[1] = font[0];
         text[caretPos] = (TCHAR)ch;
         font[caretPos] = CurrentFont;
         length++;
@@ -545,4 +547,21 @@ BOOL TextBox::IsNormalChar(TCHAR ch)
             isNormal = false;
     }
     return isNormal;
+}
+
+
+EditorState TextBox::GetState()
+{
+    EditorState state;
+    memcpy(state.text, text, sizeof(TCHAR) * length);
+    memcpy(state.font, font, sizeof(BYTE) * length);
+    state.length = length;
+    return state;
+}
+
+VOID TextBox::LoadState(EditorState state)
+{
+    length = state.length;
+    memcpy(text, state.text, sizeof(TCHAR) * length);
+    memcpy(font, state.font, sizeof(BYTE) * length);
 }

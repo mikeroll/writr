@@ -1,4 +1,14 @@
 #pragma once
+
+#define MAX_LENGTH 2000
+
+struct EditorState
+{
+    TCHAR text[MAX_LENGTH];
+    BYTE font[MAX_LENGTH];
+    UINT length;
+};
+
 class TextBox
 {
 private:
@@ -19,11 +29,11 @@ private:
 
     //Text and formatting
 
-    static const UINT MAX_LENGTH=2000;
-    TCHAR text[MAX_LENGTH];
+    TCHAR text[MAX_LENGTH]; // aaand once again
     BYTE font[MAX_LENGTH];
     UINT length;
-    //TODO: Timg image[MAX_LENGTH];
+    //TODO: Timg image[MAX_LE...NO WAI!
+    //TODO: std::list<Timg> images;
 
 
     // Caret control
@@ -79,9 +89,7 @@ public:
     VOID SelectWord(HWND hWnd);
     BOOL IsNormalChar(TCHAR ch);
 
-    inline UINT     GetLength()  { return length; }
-    inline UINT     SetLength(UINT n) { length = n; text[n] = (TCHAR)0; return length; }
-    inline LPTSTR   GetTextPtr() { return text; }
-    inline PBYTE    GetFontPtr() { return font; }
+    EditorState GetState();
+    VOID LoadState(EditorState state);
 };
 

@@ -192,7 +192,7 @@ VOID TextBox::KeyPress(HWND hWnd, WPARAM wParam)
 
 BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 {
-    BOOL redraw = 1;        //for ReDraw'ing window
+    BOOL redraw = true;        //for ReDraw'ing window
     switch (wParam)
     {
     case VK_LEFT:
@@ -498,7 +498,7 @@ BOOL TextBox::SetCurrentFont(BYTE f)
             {
                 font[i] = f;
             }
-            redraw = 1;
+            redraw = true;
         }
     }
     selectStart = 0;

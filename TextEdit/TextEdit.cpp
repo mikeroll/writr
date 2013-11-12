@@ -2,10 +2,13 @@
 //
 
 #include "stdafx.h"
-#include "TextEdit.h"
 #include <string.h>
+#include <windowsx.h>
+
+#include "TextEdit.h"
+
 #include "TextBox.h"
-#include "windowsx.h"
+#include "WritrDocument.h"
 
 
 #define MAX_LOADSTRING 100
@@ -224,6 +227,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
+		case ID_FILE_OPEN:
+			break;
+		case ID_FILE_SAVE:
+			break;
 		case ID_EDIT_ARIAL:
 			if (editor->SetCurrentFont(0))
 				editor->ReDrawBox(hWnd);
@@ -246,12 +253,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_SIZE:
-		editor->SetBox(lParam);
+		editor->ResizeBox(lParam);
 		break;
 	case WM_MOUSEWHEEL:
 		if (GetKeyState(VK_CONTROL) < 0)
 		{
-			(GET_WHEEL_DELTA_WPARAM(wParam)>0) ? editor->WheelUP() : editor->WheelDN();
+            if (GET_WHEEL_DELTA_WPARAM(wParam)>0)
+                editor->ZoomIn();
+            else
+                editor->ZoomOut();
 			editor->ReDrawBox(hWnd);
 		}		
 		break;

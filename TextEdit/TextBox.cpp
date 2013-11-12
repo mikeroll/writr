@@ -8,7 +8,7 @@ TextBox::TextBox()
 	GROUND = 0;
 	MaxHght = 0;
 	CaretPos = 0;
-	text[0] = '\0';
+	text[0] = (TCHAR)0;
 	font[0] = 0;
 	CountElements = 0;
 	DBLClicK = false;
@@ -38,7 +38,7 @@ void TextBox::AddText(char ch)	//add one symbol
 			text[i + 1] = text[i];
 			font[i + 1] = font[i];
 		}
-		text[CaretPos] = ch;
+		text[CaretPos] = (TCHAR)ch;
 		font[CaretPos] = CurrentFont;
 		CountElements++;
 		if (CaretPos<CountElements)
@@ -70,7 +70,7 @@ void TextBox::ReDrawBox(HWND hWnd)
 	HFONT hFont;
 	SIZE s;
 	TCHAR CH[2];
-	CH[1] = '\0';
+	CH[1] = (TCHAR)0;
 	r = {0,0,WALL,GROUND};
 	HDC hdc = GetDC(hWnd);
 	HideCaret(hWnd);
@@ -309,7 +309,7 @@ void TextBox::SelectOrSetCaret(HWND hWnd)		//Difference with ReDrawBox(): all te
 	SIZE s;
 	HFONT hFont;
 	TCHAR CH[2];
-	CH[1] = '\0';
+	CH[1] = (TCHAR)0;
 	r = { 0, 0, WALL, GROUND };
 	HDC hdc = GetDC(hWnd);
 	HideCaret(hWnd);
@@ -532,26 +532,11 @@ void TextBox::SelectWord(HWND hWnd)
 int TextBox::IsNormalChar(TCHAR ch)
 {
 	int result=1;
-	TCHAR C[7] = {' ', ',', '.', '\r', '@', '_', '\0'};
+	TCHAR C[7] = {' ', ',', '.', '\r', '@', '_', (TCHAR)0 };
 	for (int i = 0; i < 7; i++)
 	{
 		if (ch == C[i])
 			result = 0;
 	}
 	return result;
-}
-
-UINT    TextBox::GetLength()
-{
-    return (UINT)(this->CountElements);
-}
-
-LPTSTR  TextBox::GetTextPtr()
-{
-    return this->text;
-}
-
-PBYTE   TextBox::GetFontPtr()
-{
-    return this->font;
 }

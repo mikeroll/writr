@@ -43,7 +43,7 @@ BOOL ImageList::LoadImageFromFile(HWND hWnd)
         bmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), imgStruct.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  //load from file
         if (bmp)
         {
-            imgList.insert(imgList.end, bmp);
+            //imgList.insert(imgList.end, bmp);
             imgCount++;
             isLoad = true;
         }

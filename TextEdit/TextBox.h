@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 #define MAX_LENGTH 2000
 
@@ -6,7 +7,8 @@ struct EditorState
 {
     TCHAR text[MAX_LENGTH];
     BYTE font[MAX_LENGTH];
-    UINT length;
+    INT length;
+    INT caretPos;
 };
 
 class TextBox
@@ -92,8 +94,8 @@ public:
     BOOL IsNormalChar(TCHAR ch);
     VOID InsertImage();
     VOID Removing(WPARAM wParam);
-    std::wstring GetSelection();
-    VOID InsertString(std::wstring);
+    std::string GetSelection();
+    VOID InsertString(std::string);
 
     EditorState GetState();
     VOID LoadState(EditorState state);

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "TextBox.h" 
 #include <Commdlg.h>
-#include <string>
+//#include <string>
 
 TextBox::TextBox(HWND hwnd)
 {
@@ -596,14 +596,14 @@ VOID TextBox::Removing(WPARAM wParam)
     ReDrawBox();
 }
 
-std::wstring TextBox::GetSelection()
+std::string TextBox::GetSelection()
 {
-    std::wstring str;
+    std::string str;
     if (isSelected)
     {
         for (int i = selectStart; i < selectEnd; i++)
         {
-            str[i] = text[i];
+            str[i] = (CHAR)text[i];
         }
         str[selectEnd - selectStart] = '\0';
         return str;
@@ -611,9 +611,9 @@ std::wstring TextBox::GetSelection()
     else return NULL;    
 }
 
-VOID TextBox::InsertString(std::wstring s)
+VOID TextBox::InsertString(std::string s)
 {
-    for (int i = 0; i < s.size; i++)
+    for (int i = 0; i < s.size(); i++)
     {
         InsertChar(s[i]);
     }
@@ -626,6 +626,7 @@ EditorState TextBox::GetState()
     memcpy(state.text, text, sizeof(TCHAR) * length);
     memcpy(state.font, font, sizeof(BYTE) * length);
     state.length = length;
+    state.caretPos = caretPos;
     return state;
 }
 
@@ -634,5 +635,5 @@ VOID TextBox::LoadState(EditorState state)
     length = state.length;
     memcpy(text, state.text, sizeof(TCHAR) * length);
     memcpy(font, state.font, sizeof(BYTE) * length);
-
+    this->caretPos = state.caretPos;
 }

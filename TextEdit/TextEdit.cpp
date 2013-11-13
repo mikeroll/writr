@@ -8,6 +8,7 @@
 #include "TextEdit.h"
 
 #include "TextBox.h"
+#include "HistoryCtl.h"
 #include "WritrDocument.h"
 
 
@@ -22,7 +23,7 @@ TCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 // App data structure
 struct AppState {
     TextBox *editor;
-    //HistoryCtl *history;
+    HistoryCtl *history;
 };
 
 // Routine for retreiving state
@@ -62,6 +63,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
     // Initialize app data
     AppState *pState = new AppState();
     pState->editor = new TextBox();
+    pState->history = new HistoryCtl(pState->editor, 5);
 
     // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow, pState))
@@ -182,9 +184,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
 
     TextBox *editor;
+    HistoryCtl *history;
     if (pState != NULL)
     {
         editor = pState->editor;
+        history = pState->history;
     }
     else
         return -1;
@@ -270,6 +274,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_DESTROY:
         delete editor;
+        delete history;
         PostQuitMessage(0);
         break;
     default:

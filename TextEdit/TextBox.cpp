@@ -617,6 +617,7 @@ EditorState TextBox::GetState()
     memcpy(state.text, text, sizeof(TCHAR) * length);
     memcpy(state.font, font, sizeof(BYTE) * length);
     state.length = length;
+    state.caretPos = caretPos;
     return state;
 }
 
@@ -625,5 +626,5 @@ VOID TextBox::LoadState(EditorState state)
     length = state.length;
     memcpy(text, state.text, sizeof(TCHAR) * length);
     memcpy(font, state.font, sizeof(BYTE) * length);
-
+    this->caretPos = state.caretPos;
 }

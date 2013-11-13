@@ -6,7 +6,8 @@ struct EditorState
 {
     TCHAR text[MAX_LENGTH];
     BYTE font[MAX_LENGTH];
-    UINT length;
+    INT length;
+    INT caretPos;
 };
 
 class TextBox

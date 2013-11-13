@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <string.h>
+#include <commdlg.h>
 #include <windowsx.h>
 
 #include "TextEdit.h"
@@ -41,6 +42,10 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int, AppState *);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+
+enum FileAction { FA_OPEN, FA_SAVE, FA_ADDIMAGE };
+LPTSTR              ChooseFile(FileAction action);
 
 void    CreatePopup(HWND, LPARAM);
 
@@ -333,4 +338,29 @@ void CreatePopup(HWND hWnd, LPARAM lParam)
     //show menu
     TrackPopupMenu(hPopupMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, NULL);
     DestroyMenu(hMenu);
+}
+
+LPTSTR ChooseFile(FileAction action)
+{
+    OPENFILENAME ofn = { 0 };
+    const DWORD maxFilename = 512;
+    TCHAR filename[maxFilename];
+    filename[0] = (TCHAR)0;
+    TCHAR *filter;
+
+    if (action == FA_ADDIMAGE)
+        filter = L"Bitmap image\0*.bmp\0\0";
+    else
+        filter = L"Writr document\0*.wdoc\0\0";
+
+    ofn.lStructSize = sizeof(ofn);
+    ofn.lpstrFile = filename;
+    ofn.nMaxFile = maxFilename;
+    ofn.lpstrFilter = filter;
+
+    if (action == FA_SAVE)
+        GetSaveFileName(&ofn);
+    else
+        GetOpenFileName(&ofn);
+    return filename;
 }

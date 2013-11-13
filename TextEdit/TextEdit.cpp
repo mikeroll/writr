@@ -156,10 +156,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
         return FALSE;
     }
 
-    pState->editor = new TextBox(hWnd);
-    pState->history = new HistoryCtl(pState->editor, 5);
-    pState->document = new WritrDocument(szDocName, pState->editor);
-    
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
@@ -190,6 +186,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
         pState = reinterpret_cast<AppState *>(pCreate->lpCreateParams);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
+        pState->editor = new TextBox(hWnd);
+        pState->history = new HistoryCtl(pState->editor, 5);
+        pState->document = new WritrDocument(szDocName, pState->editor);
     }
     else
     {

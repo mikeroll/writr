@@ -275,11 +275,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // Edit
         case ID_EDIT_UNDO:
             history->Undo();
-            editor->ReDrawBox();
             break;
         case ID_EDIT_REDO:
             history->Redo();
-            editor->ReDrawBox();
             break;
         case ID_EDIT_CUT:
             break;

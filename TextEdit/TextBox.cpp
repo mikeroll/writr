@@ -442,6 +442,13 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         caretPos = selectEnd;
         SetCaretPos(Curr.x,Curr.y);
     }
+
+    if ((isClicked && !isSelected) && (selectStart == selectEnd == 0))
+    {
+        SetCaretPos(0,0);
+        caretPos = 0;
+    }
+
         
 
     if (isDblClicked)

@@ -39,7 +39,8 @@ inline AppState* GetAppState(HWND hWnd)
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int, AppState *);
+BOOL                InitInstance(HINSTANCE, int);
+//BOOL                InitInstance(HINSTANCE, int, AppState *);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
@@ -67,14 +68,10 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
     LoadString(hInstance, IDC_TEXTEDIT, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
-    // Initialize app data
-    AppState *pState = new AppState();
-    pState->editor = new TextBox();
-    pState->history = new HistoryCtl(pState->editor, 5);
-    pState->document = new WritrDocument(szDocName, pState->editor);
-
+    
     // Perform application initialization:
-    if (!InitInstance (hInstance, nCmdShow, pState))
+    //if (!InitInstance (hInstance, nCmdShow, pState))
+    if (!InitInstance (hInstance, nCmdShow))
     {
         return FALSE;
     }
@@ -130,12 +127,16 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, AppState *pState)
+//BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, AppState *pState)
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
     // Initialize data struct
 
     HWND hWnd;
 
+    // Initialize app data
+    AppState *pState = new AppState();
+    
     hInst = hInstance; // Store instance handle in our global variable
 
     hWnd = CreateWindowEx(
@@ -155,6 +156,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, AppState *pState)
         return FALSE;
     }
 
+    pState->editor = new TextBox(hWnd);
+    pState->history = new HistoryCtl(pState->editor, 5);
+    pState->document = new WritrDocument(szDocName, pState->editor);
+    
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
@@ -206,29 +211,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_LBUTTONDBLCLK:
-        editor->SelectWord(hWnd);
+        editor->SelectWord();
         break;
     case WM_RBUTTONDOWN:
         break;
     case WM_LBUTTONDOWN:
-        editor->MouseDown(lParam);
-        editor->ReDrawBox(hWnd);
+        if(editor->MouseDown(lParam))
+            editor->ReDrawBox();
         break;
     case WM_LBUTTONUP:
-        editor->MouseUp(lParam,hWnd);
+        editor->MouseUp(lParam);
         break;
     case WM_CHAR:
         if (wParam == VK_BACK)
-            editor->Removing(hWnd,wParam);
+            editor->Removing(wParam);
         else if (!(GetKeyState(VK_CONTROL) < 0))
-            editor->KeyPress(hWnd,wParam);
+            editor->KeyPress(wParam);
         //InvalidateRect(hWnd,NULL,TRUE);//чтобы вызвать WM_PAINT
         break;
     case WM_KEYDOWN:
         if (wParam == VK_DELETE)
-        {   editor->Removing(hWnd,wParam);  }
-        else if (editor->SystemKey(wParam,hWnd))
-            editor->ReDrawBox(hWnd);
+        {   editor->Removing(wParam);  }
+        else if (editor->SystemKey(wParam))
+            editor->ReDrawBox();
         break;
     case WM_CONTEXTMENU:
         CreatePopup(hWnd,lParam);
@@ -265,15 +270,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // Fonts
         case ID_FONT_ARIAL:
             if (editor->SetCurrentFont(0))
-                editor->ReDrawBox(hWnd);
+                editor->ReDrawBox();
             break;
         case ID_FONT_TIMESNEWROMAN:
             if (editor->SetCurrentFont(1))
-                editor->ReDrawBox(hWnd);
+                editor->ReDrawBox();
             break;
         case ID_FONT_KRISTENITC:
             if (editor->SetCurrentFont(2))
-                editor->ReDrawBox(hWnd);
+                editor->ReDrawBox();
             break;
 
         default:
@@ -282,7 +287,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         hdc = BeginPaint(hWnd, &ps);
-        editor->ReDrawBox(hWnd);
+        editor->ReDrawBox();
         EndPaint(hWnd, &ps);
         break;
     case WM_SIZE:
@@ -295,7 +300,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 editor->ZoomIn();
             else
                 editor->ZoomOut();
-            editor->ReDrawBox(hWnd);
+            editor->ReDrawBox();
         }		
         break;
     case WM_DESTROY:

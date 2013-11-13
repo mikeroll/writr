@@ -2,8 +2,10 @@
 #include "TextBox.h" 
 #include <Commdlg.h>
 
-TextBox::TextBox()
+TextBox::TextBox(HWND hwnd)
 {
+    hWnd = hwnd;
+    
     wall = 0;
     ground = 0;
     maxLineHeight = 0;
@@ -71,7 +73,7 @@ VOID TextBox::ResizeBox(LPARAM lParam)
     ground = HIWORD(lParam);
 }
 
-VOID TextBox::ReDrawBox(HWND hWnd)
+VOID TextBox::ReDrawBox()
 {
     Point Curr = { 0, 0 };
     maxLineHeight = 0;
@@ -93,7 +95,7 @@ VOID TextBox::ReDrawBox(HWND hWnd)
         hFont = CreateFontIndirectW(&Font[font[i]]);
         SelectObject(hdc,hFont);
         GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
-        CreateCar(hWnd, s.cy);
+        CreateCar(s.cy);
         if (text[i] != '\r' && text[i] != '@')		//+ font, +image
         {
             if (text[i] == '_')
@@ -174,7 +176,7 @@ VOID TextBox::ReDrawBox(HWND hWnd)
     ReleaseDC(hWnd, hdc);
 }
 
-VOID TextBox::KeyPress(HWND hWnd, WPARAM wParam)
+VOID TextBox::KeyPress(WPARAM wParam)
 {
     unsigned int key = wParam;
     switch (key)
@@ -186,11 +188,11 @@ VOID TextBox::KeyPress(HWND hWnd, WPARAM wParam)
         InsertChar(key);
         break;
     }
-    ReDrawBox(hWnd);
+    ReDrawBox();
     //TODO: add history
 }
 
-BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
+BOOL TextBox::SystemKey(WPARAM wParam)
 {
     BOOL redraw = true;        //for ReDraw'ing window
     if ((GetKeyState(VK_CONTROL) < 0) && (LOWORD(wParam) == 0x41))		//Ctrl+A
@@ -198,18 +200,18 @@ BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
         selectStart = 0;
         selectEnd = length;
         isDblClicked = true;		//just becouse work as DBLClicK
-        SelectOrSetCaret(hWnd);
+        SelectOrSetCaret();
         redraw=false;
     }
 
     switch (wParam)
     {
     case VK_LEFT:
-        MoveCar(LEFT, hWnd);
+        MoveCar(LEFT);
         redraw = false;
         break;
     case VK_RIGHT:
-        MoveCar(RIGHT, hWnd);
+        MoveCar(RIGHT);
         redraw = false;
         break;
     default:
@@ -218,7 +220,7 @@ BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
     return redraw;
 }
 
-VOID TextBox::MoveCar(Direction dir, HWND hWnd)
+VOID TextBox::MoveCar(Direction dir)
 {
     switch (dir)
     {
@@ -246,31 +248,38 @@ VOID TextBox::MoveCar(Direction dir, HWND hWnd)
         isSelected = false;
         selectStart = 0;
         selectEnd = 0;
-        ReDrawBox(hWnd);
+        ReDrawBox();
     }
     else
-        SelectOrSetCaret(hWnd);
+        SelectOrSetCaret();
 }
 
-VOID TextBox::CreateCar(HWND hWnd, int height)
+VOID TextBox::CreateCar(int height)
 {
     HDC hdc = GetDC(hWnd);
     ReleaseDC(hWnd, hdc);
     CreateCaret(hWnd, NULL, 2, height);	
 }
 
-VOID TextBox::MouseDown(LPARAM lParam)
+BOOL TextBox::MouseDown(LPARAM lParam)
 {
+    BOOL redraw = false;
+    if (isSelected)
+        redraw = true;
     MStart.x = LOWORD(lParam);
     MStart.y = HIWORD(lParam);
+    MEnd.x = MStart.x;
+    MEnd.y = MStart.y;
     isClicked = true;
     isDblClicked = false;
     isSelected = false;
     selectStart = 0;
     selectEnd = 0;
+    SelectOrSetCaret();
+    return redraw;
 }
 
-VOID TextBox::MouseUp(LPARAM lParam, HWND hWnd)
+VOID TextBox::MouseUp(LPARAM lParam)
 {
     MEnd.x = LOWORD(lParam);
     MEnd.y = HIWORD(lParam);
@@ -279,12 +288,12 @@ VOID TextBox::MouseUp(LPARAM lParam, HWND hWnd)
         isSelected = true;		
     }
     if (!isDblClicked)
-        SelectOrSetCaret(hWnd);
+        SelectOrSetCaret();
     else
         isDblClicked = false;
 }
 
-VOID TextBox::MouseMove(LPARAM lParam, HWND hWnd)
+VOID TextBox::MouseMove(LPARAM lParam)
 {
     if (isClicked)
     {
@@ -298,7 +307,7 @@ VOID TextBox::MouseMove(LPARAM lParam, HWND hWnd)
     }
 }
 
-VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): all text not redraw - only selected part
+VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text not redraw - only selected part
 {
     Point Curr = { 0, 0 };
     maxLineHeight = 0;
@@ -325,7 +334,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         hFont = CreateFontIndirectW(&Font[font[i]]);    //need for
         SelectObject(hdc, hFont);                       //caret position
         GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
-        CreateCar(hWnd, s.cy);
+        CreateCar(s.cy);
         
         //----------------DoubleClick-------------
         if (isDblClicked && i == selectStart)
@@ -360,7 +369,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
                     if (isSelected)
                     {
                         selectStart = i;
-                        filling = true;						
+                        filling = true;
                     }
                 }
                 
@@ -436,6 +445,17 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         }
     }
     
+    if ((MEnd.y > (Curr.y+s.cy)) || (MEnd.y == Curr.y && MEnd.x > Curr.x))
+    {
+        if (isClicked || isSelected || isDblClicked)
+        {
+            selectEnd = length;
+            caretPos = selectEnd;
+            SetCaretPos(Curr.x,Curr.y);
+        }
+    }
+    
+    /*
     if ((isClicked || isSelected || isDblClicked) && (selectEnd == 0))
     {
         selectEnd = length; //if selected part go trough the end of text
@@ -447,7 +467,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
     {
         SetCaretPos(0,0);
         caretPos = 0;
-    }
+    }*/
 
         
 
@@ -513,7 +533,7 @@ BOOL TextBox::SetCurrentFont(BYTE f)
     return redraw;		
 }
 
-VOID TextBox::SelectWord(HWND hWnd)
+VOID TextBox::SelectWord()
 {
     int pos=caretPos;
     
@@ -535,7 +555,7 @@ VOID TextBox::SelectWord(HWND hWnd)
         }
         selectEnd++;
         isDblClicked = true;
-        SelectOrSetCaret(hWnd);
+        SelectOrSetCaret();
     }
 }
 
@@ -551,7 +571,7 @@ BOOL TextBox::IsNormalChar(TCHAR ch)
     return isNormal;
 }
 
-VOID TextBox::Removing(HWND hWnd, WPARAM wParam)
+VOID TextBox::Removing(WPARAM wParam)
 {
     if (wParam == VK_DELETE)
     {
@@ -586,8 +606,9 @@ VOID TextBox::Removing(HWND hWnd, WPARAM wParam)
             }
         }
     }
-    ReDrawBox(hWnd);
+    ReDrawBox();
 }
+
 
 
 EditorState TextBox::GetState()

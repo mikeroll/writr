@@ -711,6 +711,9 @@ VOID TextBox::ResetState()
     MEnd = { 0, 0 };
     CurrentFont = 0;
 
+    imgCount = 0;
+    images = new ImageList();
+
     zoom = Font[CurrentFont].lfHeight;//don't write under the Font[]!!!
 
     ReDrawBox();

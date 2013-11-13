@@ -6,17 +6,15 @@
 
 ImageList::ImageList()
 {
-    imgCount = 0;
 }
-
 
 ImageList::~ImageList()
 {
 }
 
-/*
-BOOL ImageList::LoadImageFromFile(HWND hWnd)
+BOOL ImageList::LoadImageFromFile()
 {
+    TCHAR imgName[MAX_PATH];    //file name(used for init.)
     HBITMAP bmp;
     BOOL isLoad=false;
     OPENFILENAME  imgStruct;
@@ -38,19 +36,58 @@ BOOL ImageList::LoadImageFromFile(HWND hWnd)
 
         
         //insert img to list
-        imgCount++;
+        
         bmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), imgStruct.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  //load from file
-        MT.imgStruct[MT.CaretPos - 1].B = (HBITMAP)LoadImage(GetModuleHandle(NULL), img.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); // загрузка картинки
-        GetObject(MT.IMG[MT.CaretPos - 1].B, sizeof(BITMAP), &Bitmap);//берем структуру что бы узнать размер
-        MT.IMG[MT.CaretPos - 1].BH = Bitmap.bmHeight; MT.IMG[MT.CaretPos - 1].BW = Bitmap.bmWidth;//размер
-        isLoad = true;
+        if (bmp)
+        {
+            imgList.insert(imgList.end(), bmp);
+            isLoad = true;
+        }
+        else
+        {
+            MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't load image!", MB_OK);
+            isLoad = false;
+        }
     }
     else
     {
-        MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't load image!", MB_OK);
+        MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't open image!", MB_OK);
         isLoad = false;
     }
         
     return isLoad;
 }
-*/
+
+HBITMAP ImageList::GatImageFromList(int index)
+{    
+    std::list<HBITMAP>::iterator iterator;
+    HBITMAP bmp;
+    iterator = imgList.begin();
+    std::advance(iterator, index);
+    bmp = *iterator;
+    return bmp;
+}
+
+VOID ImageList::GetImageSize(SIZE *s, int index)
+{
+    BITMAP bmpStruct;
+    GetObject(GatImageFromList(index), sizeof(BITMAP), &bmpStruct);
+    (*s).cx = bmpStruct.bmWidth;
+    (*s).cy = bmpStruct.bmWidth;
+}
+
+VOID ImageList::DrawImage(HWND hWnd, int index,int x, int y)
+{
+    SIZE s;
+    GetImageSize(&s,index);
+    HDC hdc = GetDC(hWnd);
+    HDC imageDc = CreateCompatibleDC(hdc);
+    SelectObject(imageDc, GatImageFromList(index));
+    BitBlt(hdc, x, y, s.cx, s.cy, imageDc, 0, 0, SRCCOPY);// рисуем картинку
+    ReleaseDC(hWnd, hdc);
+    DeleteDC(imageDc);
+}
+
+
+
+

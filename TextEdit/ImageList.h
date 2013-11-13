@@ -1,16 +1,17 @@
 #pragma once
+#include <list>
 class ImageList
 {
 private:
-    SIZE imageSize;
-    TCHAR imgName[MAX_PATH];    //file name
-    int imgCount;
+    std::list<HBITMAP> imgList;
 
 public:
      ImageList();
     ~ImageList();
 
-    //VOID LoadImageFromFile(HWND hWnd);
-    
+    BOOL LoadImageFromFile();
+    HBITMAP GatImageFromList(int index);
+    VOID GetImageSize(SIZE *s, int index);
+    VOID DrawImage(HWND hWnd, int index, int x, int y);    
 };
 

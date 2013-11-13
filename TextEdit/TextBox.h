@@ -1,6 +1,10 @@
 #pragma once
+#include <string>
+#include "ImageList.h"
 
 #define MAX_LENGTH 2000
+#define IMAGE 0xff
+
 
 struct EditorState
 {
@@ -43,7 +47,6 @@ private:
 
     // Selection control
 
-    BOOL isClicked;
     BOOL isDblClicked;
     BOOL isSelected;
     int selectStart, selectEnd;
@@ -68,11 +71,18 @@ private:
 
     HWND hWnd;
 
+
+    // Image
+
+    int imgCount;
+    ImageList *images;
+
     
 public:
+    BOOL isClicked;
     TextBox(HWND hwnd);
 	~TextBox();
-    VOID InsertChar(char ch);
+    VOID InsertChar(TCHAR ch);
     VOID RemoveChar();
 
     VOID ResizeBox(LPARAM lParam);
@@ -91,10 +101,11 @@ public:
     BOOL SetCurrentFont(BYTE f);
     VOID SelectWord();
     BOOL IsNormalChar(TCHAR ch);
-    VOID InsertImage();
     VOID Removing(WPARAM wParam);
-    LPTSTR GetSelection();
-    VOID InsertString(LPTSTR);
+    std::string GetSelection();
+    VOID InsertString(std::string);
+
+    VOID InsertImage();
 
     EditorState GetState();
     VOID LoadState(EditorState state);

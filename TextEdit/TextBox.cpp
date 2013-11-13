@@ -19,9 +19,10 @@ TextBox::TextBox(HWND hWnd)
 
 TextBox::~TextBox()
 {
+    delete images;
 }
 
-VOID TextBox::InsertChar(char ch)
+VOID TextBox::InsertChar(TCHAR ch)
 {
     if (length < (MAX_LENGTH - 1))
     {
@@ -57,6 +58,8 @@ VOID TextBox::ResizeBox(LPARAM lParam)
 
 VOID TextBox::ReDrawBox()
 {
+    BOOL isImage = false;
+    int imgIndex = 0;
     Point Curr = { 0, 0 };
     maxLineHeight = 0;
     HFONT hFont;
@@ -72,14 +75,24 @@ VOID TextBox::ReDrawBox()
     
     for (int i = 0; i < length; i++)
     {
+        isImage = false;
+        imgIndex = 0;
         DestroyCaret();
         Font[font[i]].lfHeight = zoom;
         hFont = CreateFontIndirectW(&Font[font[i]]);
         SelectObject(hdc,hFont);
         GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
         CreateCar(s.cy);
-        if (text[i] != '\r' && text[i] != '@')		//+ font, +image
+        if (text[i] != '\r')		//+ font, +image
         {
+            if ((text[i]>>8)==IMAGE)          //if image
+            {
+                isImage = true;
+                imgIndex = text[i] & IMAGE;
+            }
+
+            if (!isImage)
+            {
             if (text[i] == '_')
             {
                 CH[0] = ' ';
@@ -91,6 +104,12 @@ VOID TextBox::ReDrawBox()
                 s.cx *= 8;
             if (maxLineHeight < s.cy)
                 maxLineHeight = s.cy;
+            }
+            else
+            {
+                images->GetImageSize(&s, imgIndex);
+            }
+
 
             //TODO: do something with this mess
             //---becouse next letter eat some part of previous...
@@ -102,7 +121,14 @@ VOID TextBox::ReDrawBox()
                 if (caretPos == i)           //Set Caret
                 {	SetCaretPos(Curr.x, Curr.y);  }
 
+                if (!isImage)
+                {
                 TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                }                    
+                else
+                {
+                    images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
+                }
                 Curr.x += s.cx;
             }
             else
@@ -114,7 +140,14 @@ VOID TextBox::ReDrawBox()
                 if (caretPos == i)      //Set Caret
                 {	SetCaretPos(Curr.x, Curr.y);	}
 
+                if (!isImage)
+                {
                 TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                }
+                else
+                {
+                    images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
+                }
                 Curr.x += s.cx;
             }
         }
@@ -288,7 +321,7 @@ VOID TextBox::MouseMove(LPARAM lParam)
         {
             isSelected = true;
         }
-        //SelectOrSetCaret(hWnd);
+        SelectOrSetCaret();
     }
 }
 
@@ -577,6 +610,39 @@ VOID TextBox::Removing(WPARAM wParam)
     ReDrawBox();
 }
 
+std::string TextBox::GetSelection()
+{
+    std::string str;
+    if (isSelected)
+    {
+        for (int i = selectStart; i < selectEnd; i++)
+        {
+            str[i] = (CHAR)text[i];
+        }
+        str[selectEnd - selectStart] = '\0';
+        return str;
+    }
+    else return NULL;    
+}
+
+VOID TextBox::InsertString(std::string s)
+{
+    for (int i = 0; i < s.size(); i++)
+    {
+        InsertChar(s[i]);
+    }
+}
+
+
+VOID TextBox::InsertImage()
+{
+    if (images->LoadImageFromFile())
+    {
+        InsertChar((TCHAR)(0xff00 + imgCount));
+        imgCount++;
+        ReDrawBox();
+    }
+}
 
 
 EditorState TextBox::GetState()

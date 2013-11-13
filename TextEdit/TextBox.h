@@ -3,6 +3,8 @@
 #include "ImageList.h"
 
 #define MAX_LENGTH 2000
+#define IMAGE 0xff
+
 
 struct EditorState
 {
@@ -80,7 +82,7 @@ public:
     BOOL isClicked;
     TextBox(HWND hwnd);
 	~TextBox();
-    VOID InsertChar(char ch);
+    VOID InsertChar(TCHAR ch);
     VOID RemoveChar();
 
     VOID ResizeBox(LPARAM lParam);

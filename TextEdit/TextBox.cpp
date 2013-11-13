@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "TextBox.h" 
 #include <Commdlg.h>
-//#include <string>
 
 TextBox::TextBox(HWND hwnd)
 {
@@ -43,7 +42,7 @@ TextBox::~TextBox()
     delete images;
 }
 
-VOID TextBox::InsertChar(char ch)
+VOID TextBox::InsertChar(TCHAR ch)
 {
     if (length < (MAX_LENGTH - 1))
     {
@@ -106,12 +105,10 @@ VOID TextBox::ReDrawBox()
         CreateCar(s.cy);
         if (text[i] != '\r')		//+ font, +image
         {
-            if (text[i]=='@')
-            //if (text[i] >= (TCHAR)(0xE000) && text[i] < (TCHAR)(0xF8FF))          //if image
+            if ((text[i]>>8)==IMAGE)          //if image
             {
                 isImage = true;
-                imgIndex = 0;
-                //imgIndex = text[i] - 0xe000;
+                imgIndex = text[i] & IMAGE;
             }
 
             if (!isImage)
@@ -661,7 +658,7 @@ VOID TextBox::InsertImage()
 {
     if (images->LoadImageFromFile())
     {
-        InsertChar('@');//((0xe000+imgCount));
+        InsertChar((TCHAR)(0xff00 + imgCount));
         imgCount++;
         ReDrawBox();
     }

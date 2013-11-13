@@ -626,11 +626,18 @@ VOID TextBox::Removing(WPARAM wParam)
     {
         if (caretPos != 0)
         {
-            caretPos--;
-            RemoveChar();
-
-            if (isSelected)
+            if (!isSelected)
             {
+                caretPos--;
+                RemoveChar();
+            }              
+            else
+            {
+                caretPos = selectStart;
+                for (int i = 0; i < selectEnd - selectStart; i++)
+                {
+                    RemoveChar();
+                }
                 isSelected = false;
                 isDblClicked = false;
                 selectStart = 0;

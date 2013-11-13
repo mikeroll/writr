@@ -19,26 +19,23 @@ private:
 		int y;
 	};
 
-
     // Client Rect
 
     WORD wall;      //right edge of the window
     WORD ground;    //bottom edge of the window
 	RECT r;	
 
-
     //Text and formatting
 
-    TCHAR text[MAX_LENGTH]; // aaand once again
+    TCHAR text[MAX_LENGTH];
     BYTE font[MAX_LENGTH];
-    UINT length;
-    //TODO: Timg image[MAX_LE...NO WAI!
+    int length;
     //TODO: std::list<Timg> images;
 
 
     // Caret control
 
-    UINT caretPos;
+    int caretPos;
     LONG maxLineHeight;
     enum Direction { LEFT, RIGHT, UP, DOWN };
 
@@ -48,16 +45,15 @@ private:
     BOOL isClicked;
     BOOL isDblClicked;
     BOOL isSelected;
-    UINT selectStart = 0, selectEnd = 0;
+    int selectStart, selectEnd;
     Point MStart, MEnd;     //MouseDown -> Mstart, MouseUp ->Mend
 
 
     // Color
 
 	COLORREF SelectColor = RGB(78, 221, 110);
-	//COLORREF BackColor = RGB(67, 78, 84);
-	COLORREF TextColor = RGB(220, 220, 220);
-	COLORREF SelectTextColor = RGB(30, 30, 30);
+    COLORREF TextColor = COLOR_WINDOWTEXT;
+    COLORREF SelectTextColor = RGB(255, 255, 255);
 
 
     // Fonts
@@ -66,6 +62,7 @@ private:
 	BYTE CurrentFont;
 	LONG zoom;
 
+    
 public:
 	TextBox();
 	~TextBox();
@@ -88,6 +85,7 @@ public:
     BOOL SetCurrentFont(BYTE f);
     VOID SelectWord(HWND hWnd);
     BOOL IsNormalChar(TCHAR ch);
+    VOID InsertImage(HWND hWnd);
 
     EditorState GetState();
     VOID LoadState(EditorState state);

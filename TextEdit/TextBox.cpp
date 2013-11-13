@@ -1,8 +1,5 @@
 #include "stdafx.h"
 #include "TextBox.h" 
-//#include <fstream>
-//#include <iostream>
-//#include <stdio.h>
 #include <Commdlg.h>
 
 TextBox::TextBox()
@@ -16,13 +13,19 @@ TextBox::TextBox()
     text[length] = (TCHAR)0;
     font[length] = 0;
 
+
     isDblClicked = false;
     isSelected = false;
     isClicked = false;
-
+    
+        
+    selectStart = 0;
+    selectEnd = 0;
     MStart = {0,0};
     MEnd = {0,0};
     CurrentFont = 0;
+
+
     Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
     Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
@@ -36,9 +39,9 @@ TextBox::~TextBox()
 
 VOID TextBox::InsertChar(char ch)
 {
-    if (length < (MAX_LENGTH-1))
+    if (length < (MAX_LENGTH - 1))
     {
-        for (UINT i = length; i > caretPos; i--)
+        for (int i = length; i >= caretPos; i--)
         {
             text[i + 1] = text[i];
             font[i + 1] = font[i];
@@ -55,13 +58,13 @@ VOID TextBox::InsertChar(char ch)
 
 VOID TextBox::RemoveChar()      // Delete (not Backspace) one symbol
 {
-    for (UINT i = caretPos; i < length; i++)
+    for (int i = caretPos; i < length; i++)    //и чем тебе не понравился int =(
     {
         text[i] = text[i + 1];
         font[i] = font[i + 1];
     }
     if (caretPos != length)
-        length--;	
+        length--;
 }
 
 VOID TextBox::ResizeBox(LPARAM lParam)
@@ -78,14 +81,14 @@ VOID TextBox::ReDrawBox(HWND hWnd)
     SIZE s;
     TCHAR CH[2];
     CH[1] = (TCHAR)0;
-    r = { 0, 0, wall, ground};
+    r = { 0, 0, wall, ground };
     HDC hdc = GetDC(hWnd);
-    HideCaret(hWnd);
+    HideCaret(hWnd);					
     SetBkMode(hdc, TRANSPARENT);
-    FillRect(hdc, &r, (HBRUSH)(COLOR_3DHIGHLIGHT));		
+    FillRect(hdc, &r, (HBRUSH)(COLOR_WINDOW));		
     SetTextColor(hdc,TextColor);
     
-    for (UINT i = 0; i < length; i++)
+    for (int i = 0; i < length; i++)
     {
         DestroyCaret();
         Font[font[i]].lfHeight = zoom;
@@ -112,7 +115,7 @@ VOID TextBox::ReDrawBox(HWND hWnd)
             s.cx += 2;  //Warning: sync. with SelectOrSetCaret()
             //---
 
-            if ((Curr.x+s.cx) < wall)       //if within the window, then print, else -> \r
+            if ((Curr.x + s.cx) < wall)       //if within the window, then print, else -> \r
             {
                 if (caretPos == i)           //Set Caret
                 {	SetCaretPos(Curr.x, Curr.y);  }
@@ -133,7 +136,7 @@ VOID TextBox::ReDrawBox(HWND hWnd)
                 Curr.x += s.cx;
             }
         }
-        else		//wrap text
+        else    //wrap text
         {
             if (caretPos == i)      //Set Caret
             {
@@ -145,6 +148,8 @@ VOID TextBox::ReDrawBox(HWND hWnd)
                 GetTextExtentPoint(hdc, (LPCTSTR)"a", 1, &s);
                 maxLineHeight = s.cy;
             }
+            Curr.y += maxLineHeight;
+            maxLineHeight = 0;      //new line -> counter=0
             Curr.x = 0;
             Curr.y += maxLineHeight;
             maxLineHeight = 0;      //new line -> counter=0
@@ -158,7 +163,7 @@ VOID TextBox::ReDrawBox(HWND hWnd)
             SetCaretPos(Curr.x, Curr.y);
         else
         {
-            if (maxLineHeight!=0)
+            if (maxLineHeight != 0)
                 SetCaretPos(0, Curr.y + maxLineHeight);
             else
             {
@@ -198,6 +203,15 @@ VOID TextBox::KeyPress(HWND hWnd, WPARAM wParam)
 BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
 {
     BOOL redraw = true;        //for ReDraw'ing window
+    if ((GetKeyState(VK_CONTROL) < 0) && (LOWORD(wParam) == 0x41))		//Ctrl+A
+    {
+        selectStart = 0;
+        selectEnd = length;
+        isDblClicked = true;		//just becouse work as DBLClicK
+        SelectOrSetCaret(hWnd);
+        redraw=false;
+    }
+
     switch (wParam)
     {
     case VK_LEFT:
@@ -210,15 +224,16 @@ BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
         break;
     case VK_DELETE:
         if (!isSelected)
-        RemoveChar();
+            RemoveChar();
         else
         {
             caretPos = selectStart;
-            for (UINT i = 0; i < selectEnd-selectStart; i++)
+            for (int i = 0; i < selectEnd - selectStart; i++)
             {
                 RemoveChar();
             }
             isSelected = false;
+            isDblClicked = false;
             selectStart = 0;
             selectEnd = 0;
         }
@@ -252,6 +267,7 @@ VOID TextBox::MoveCar(Direction dir, HWND hWnd)
     }
     if (isSelected)
     {
+        isDblClicked = false;
         isClicked = false;
         isSelected = false;
         selectStart = 0;
@@ -262,9 +278,8 @@ VOID TextBox::MoveCar(Direction dir, HWND hWnd)
         SelectOrSetCaret(hWnd);
 }
 
-VOID TextBox::CreateCar(HWND hWnd,int height)
+VOID TextBox::CreateCar(HWND hWnd, int height)
 {
-    SIZE s;
     HDC hdc = GetDC(hWnd);
     ReleaseDC(hWnd, hdc);
     CreateCaret(hWnd, NULL, 2, height);	
@@ -275,14 +290,14 @@ VOID TextBox::MouseDown(LPARAM lParam)
     MStart.x = LOWORD(lParam);
     MStart.y = HIWORD(lParam);
     isClicked = true;
+    isDblClicked = false;
     isSelected = false;
     selectStart = 0;
     selectEnd = 0;
 }
 
-VOID TextBox::MouseUp(LPARAM lParam,HWND hWnd)
+VOID TextBox::MouseUp(LPARAM lParam, HWND hWnd)
 {
-    //isClicked = false;
     MEnd.x = LOWORD(lParam);
     MEnd.y = HIWORD(lParam);
     if (MStart.x != MEnd.x || MStart.y != MEnd.y)
@@ -329,10 +344,10 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         swap(&MStart,&MEnd);		//if necessary
     }
 
-    for (UINT i = 0; i < length; i++)
+    for (int i = 0; i < length; i++)
     {
         DestroyCaret();
-        Font[font[i]].lfHeight = zoom;                  //don't touch!  
+        Font[font[i]].lfHeight = zoom;                  //don't touch!
         hFont = CreateFontIndirectW(&Font[font[i]]);    //need for
         SelectObject(hdc, hFont);                       //caret position
         GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
@@ -344,9 +359,9 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         if (isDblClicked && i == selectEnd)
             filling = false;
         //------------------------------------------
-            
-        if (text[i] != '\r' && text[i] != '@')		//+ font, +image
-        {			
+
+        if (text[i] != '\r' && text[i] != '@')		//+image
+        {
             if (text[i] == '_')
             {
                 CH[0] = ' ';
@@ -418,6 +433,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
             if ((!isClicked || isSelected) && caretPos == i)
                 SetCaretPos(Curr.x, Curr.y);
             
+
             if (maxLineHeight == 0)
             {
                 GetTextExtentPoint(hdc, (LPCTSTR)"a", 1, &s);
@@ -446,12 +462,17 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         }
     }
     
-    if (selectEnd == 0)
+    if ((isClicked || isSelected || isDblClicked) && (selectEnd == 0))
+    {
         selectEnd = length; //if selected part go trough the end of text
+        caretPos = selectEnd;
+        SetCaretPos(Curr.x,Curr.y);
+    }
+        
 
     if (isDblClicked)
         isSelected = true;
-    // SetBkColor(hdc, BackColor);
+
     SetTextColor(hdc,TextColor);
     isClicked = false;
     ShowCaret(hWnd);
@@ -499,7 +520,7 @@ BOOL TextBox::SetCurrentFont(BYTE f)
             CurrentFont = f;
         else
         {
-            for (UINT i = selectStart; i < selectEnd; i++)
+            for (int i = selectStart; i < selectEnd; i++)
             {
                 font[i] = f;
             }
@@ -508,16 +529,16 @@ BOOL TextBox::SetCurrentFont(BYTE f)
     }
     selectStart = 0;
     selectEnd = 0;
-    return redraw;
+    return redraw;		
 }
 
 VOID TextBox::SelectWord(HWND hWnd)
 {
-    UINT pos = caretPos;
+    int pos=caretPos;
     
     if (IsNormalChar(text[pos]))       //if text[pos] is a letter
     {
-        UINT j = pos;
+        int j = pos;
         //find left bound
         while (j >= 0 && j < length && IsNormalChar(text[j]))
         {

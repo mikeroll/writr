@@ -102,8 +102,8 @@ public:
     VOID SelectWord();
     BOOL IsNormalChar(TCHAR ch);
     VOID Removing(WPARAM wParam);
-    std::string GetSelection();
-    VOID InsertString(std::string);
+    std::wstring GetSelection();
+    VOID InsertString(std::wstring);
 
     VOID InsertImage();
 

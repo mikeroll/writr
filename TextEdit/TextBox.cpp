@@ -14,6 +14,9 @@ TextBox::TextBox(HWND hWnd)
     Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
 
+    imgCount = 0;
+    images = new ImageList();
+
     ResetState();
 }
 
@@ -605,60 +608,42 @@ BOOL TextBox::IsNormalChar(TCHAR ch)
 
 VOID TextBox::Removing(WPARAM wParam)
 {
-    if (wParam == VK_DELETE)
+    if (isSelected)
     {
-        if (!isSelected)
-            RemoveChar();
-        else
+        caretPos = selectStart;
+        for (int i = 0; i < selectEnd - selectStart; i++)
         {
-            caretPos = selectStart;
-            for (int i = 0; i < selectEnd - selectStart; i++)
-            {
-                RemoveChar();
-            }
-            isSelected = false;
-            isDblClicked = false;
-            selectStart = 0;
-            selectEnd = 0;
+            RemoveChar();
         }
+        isSelected = false;
+        isDblClicked = false;
+        selectStart = 0;
+        selectEnd = 0;
     }
-    else if (wParam == VK_BACK)
+    else
     {
-        if (caretPos != 0)
-        {
+        if (wParam == VK_BACK)
             caretPos--;
-            RemoveChar();
+        if (wParam == VK_DELETE) {}
+        RemoveChar();
 
-            if (isSelected)
-            {
-                isSelected = false;
-                isDblClicked = false;
-                selectStart = 0;
-                selectEnd = 0;
-            }
-        }
     }
     ReDrawBox();
 }
 
-std::string TextBox::GetSelection()
+std::wstring TextBox::GetSelection()
 {
-    std::string str;
     if (isSelected)
     {
-        for (int i = selectStart; i < selectEnd; i++)
-        {
-            str[i] = (CHAR)text[i];
-        }
-        str[selectEnd - selectStart] = '\0';
-        return str;
+        std::wstring chunk(text[selectStart], selectEnd - selectStart);
+        return chunk;
     }
-    else return NULL;    
+    else return NULL;
 }
 
-VOID TextBox::InsertString(std::string s)
+VOID TextBox::InsertString(std::wstring s)
 {
-    for (int i = 0; i < s.size(); i++)
+    for (int i = 0; i < (int)s.size(); i++)
     {
         InsertChar(s[i]);
     }

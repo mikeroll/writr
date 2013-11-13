@@ -8,8 +8,7 @@ private:
         int x;
         int y;
     };
-
-
+    
     // Client Rect
     
     WORD wall;      //right edge of the window
@@ -18,16 +17,16 @@ private:
 
     //Text and formatting
 
-    static const UINT MAX_LENGTH = 2000;
+    static const int MAX_LENGTH = 2000;
     TCHAR text[MAX_LENGTH];
     BYTE font[MAX_LENGTH];
-    UINT length;
+    int length;
     //TODO: Timg image[MAX_LENGTH];
 
 
     // Caret control
     
-    UINT caretPos;
+    int caretPos;
     LONG maxLineHeight;
     enum Direction { LEFT, RIGHT, UP, DOWN };
 
@@ -37,7 +36,7 @@ private:
     BOOL isClicked;
     BOOL isDblClicked;
     BOOL isSelected;
-    UINT selectStart = 0, selectEnd = 0;
+    int selectStart, selectEnd;
     Point MStart, MEnd;     //MouseDown -> Mstart, MouseUp ->Mend 
 
 
@@ -54,7 +53,7 @@ private:
     BYTE CurrentFont;
     LONG zoom;
   
-
+    
 public:
     TextBox();
     ~TextBox();
@@ -64,8 +63,8 @@ public:
     VOID ResizeBox(LPARAM lParam);
     VOID ReDrawBox(HWND hWnd);
     VOID KeyPress(HWND hWnd, WPARAM wParam);
-    BOOL SystemKey(WPARAM wParam, HWND hWnd);
-    VOID MoveCar(Direction dir, HWND hWnd);
+    BOOL SystemKey(WPARAM wParam,HWND hWnd);
+    VOID MoveCar(Direction dir,HWND hWnd);
     VOID CreateCar(HWND hWnd, int height);
     VOID MouseDown(LPARAM lParam);
     VOID MouseUp(LPARAM lParam, HWND hWnd);

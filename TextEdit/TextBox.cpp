@@ -623,7 +623,7 @@ VOID TextBox::Removing(WPARAM wParam)
     else
     {
         if (wParam == VK_BACK)
-            caretPos--;
+            if (caretPos > 0) caretPos--;
         if (wParam == VK_DELETE) {}
         RemoveChar();
 

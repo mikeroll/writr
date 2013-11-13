@@ -245,21 +245,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_EXIT:
             DestroyWindow(hWnd);
             break;
-        case ID_EDIT_INSERTIMAGE:
-            //editor->InsertImage(hWnd);
+
+        //Edit
+        case ID_EDIT_UNDO:
             break;
-        case ID_EDIT_ARIAL:
+        case ID_EDIT_REDO:
+            break;
+        case ID_EDIT_CUT:
+            break;
+        case ID_EDIT_COPY:
+            break;
+        case ID_EDIT_PASTE:
+            break;
+
+        // Insert
+        case ID_INSERT_IMAGE:
+            break;
+
+        // Fonts
+        case ID_FONT_ARIAL:
             if (editor->SetCurrentFont(0))
                 editor->ReDrawBox(hWnd);
             break;
-        case ID_EDIT_TIMESNEWROMAN:
+        case ID_FONT_TIMESNEWROMAN:
             if (editor->SetCurrentFont(1))
                 editor->ReDrawBox(hWnd);
             break;
-        case ID_EDIT_KRISTENITC:
+        case ID_FONT_KRISTENITC:
             if (editor->SetCurrentFont(2))
                 editor->ReDrawBox(hWnd);
             break;
+
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
         }

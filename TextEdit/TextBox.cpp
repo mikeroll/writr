@@ -179,14 +179,6 @@ VOID TextBox::KeyPress(HWND hWnd, WPARAM wParam)
     unsigned int key = wParam;
     switch (key)
     {
-    case VK_BACK:
-        if (caretPos != 0)
-        {
-            caretPos--;
-            RemoveChar();
-        }
-        break;
-
     case VK_TAB:
         InsertChar('_');
         break;
@@ -219,22 +211,6 @@ BOOL TextBox::SystemKey(WPARAM wParam, HWND hWnd)
     case VK_RIGHT:
         MoveCar(RIGHT, hWnd);
         redraw = false;
-        break;
-    case VK_DELETE:
-        if (!isSelected)
-            RemoveChar();
-        else
-        {
-            caretPos = selectStart;
-            for (int i = 0; i < selectEnd - selectStart; i++)
-            {
-                RemoveChar();
-            }
-            isSelected = false;
-            isDblClicked = false;
-            selectStart = 0;
-            selectEnd = 0;
-        }
         break;
     default:
         redraw = false;
@@ -566,4 +542,42 @@ BOOL TextBox::IsNormalChar(TCHAR ch)
             isNormal = false;
     }
     return isNormal;
+}
+
+VOID TextBox::Removing(HWND hWnd, WPARAM wParam)
+{
+    if (wParam == VK_DELETE)
+    {
+        if (!isSelected)
+            RemoveChar();
+        else
+        {
+            caretPos = selectStart;
+            for (int i = 0; i < selectEnd - selectStart; i++)
+            {
+                RemoveChar();
+            }
+            isSelected = false;
+            isDblClicked = false;
+            selectStart = 0;
+            selectEnd = 0;
+        }
+    }
+    else if (wParam == VK_BACK)
+    {
+        if (caretPos != 0)
+        {
+            caretPos--;
+            RemoveChar();
+
+            if (isSelected)
+            {
+                isSelected = false;
+                isDblClicked = false;
+                selectStart = 0;
+                selectEnd = 0;
+            }            
+        }
+    }
+    ReDrawBox(hWnd);
 }

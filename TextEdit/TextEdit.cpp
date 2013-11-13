@@ -204,12 +204,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         editor->MouseUp(lParam,hWnd);
         break;
     case WM_CHAR:
-        if (!(GetKeyState(VK_CONTROL) < 0))
+        if (wParam == VK_BACK)
+            editor->Removing(hWnd,wParam);
+        else if (!(GetKeyState(VK_CONTROL) < 0))
             editor->KeyPress(hWnd,wParam);
         //InvalidateRect(hWnd,NULL,TRUE);//чтобы вызвать WM_PAINT
         break;
     case WM_KEYDOWN:
-        if (editor->SystemKey(wParam,hWnd))
+        if (wParam == VK_DELETE)
+        {   editor->Removing(hWnd,wParam);  }
+        else if (editor->SystemKey(wParam,hWnd))
             editor->ReDrawBox(hWnd);
         break;
     case WM_CONTEXTMENU:

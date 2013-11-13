@@ -77,6 +77,7 @@ public:
     VOID SelectWord(HWND hWnd);
     BOOL IsNormalChar(TCHAR ch);
     VOID InsertImage(HWND hWnd);
+    VOID Removing(HWND hWnd, WPARAM wParam);
 
     inline UINT     GetLength()  { return length; }
     inline UINT     SetLength(UINT n) { length = n; text[n] = (TCHAR)0; return length; }

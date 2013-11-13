@@ -692,6 +692,7 @@ VOID TextBox::LoadState(EditorState state)
     memcpy(text, state.text, sizeof(TCHAR) * length);
     memcpy(font, state.font, sizeof(BYTE) * length);
     this->caretPos = state.caretPos;
+    ReDrawBox();
 }
 
 VOID TextBox::ResetState()

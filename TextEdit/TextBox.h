@@ -87,6 +87,8 @@ public:
     BOOL IsNormalChar(TCHAR ch);
     VOID InsertImage(HWND hWnd);
     VOID Removing(HWND hWnd, WPARAM wParam);
+    LPTSTR GetSelection();
+    VOID InsertString(LPTSTR);
 
     EditorState GetState();
     VOID LoadState(EditorState state);

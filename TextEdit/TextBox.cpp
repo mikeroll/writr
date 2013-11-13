@@ -590,6 +590,7 @@ VOID TextBox::Removing(HWND hWnd, WPARAM wParam)
 }
 
 
+
 EditorState TextBox::GetState()
 {
     EditorState state;

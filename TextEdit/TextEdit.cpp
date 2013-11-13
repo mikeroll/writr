@@ -224,13 +224,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CHAR:
         if (wParam == VK_BACK)
             editor->Removing(wParam);
-        else if (!(GetKeyState(VK_CONTROL) < 0))
+        else if (!(GetKeyState(VK_CONTROL) < 0)) {
             editor->KeyPress(wParam);
+        }
+        history->Memorize();
         //InvalidateRect(hWnd,NULL,TRUE);//чтобы вызвать WM_PAINT
         break;
     case WM_KEYDOWN:
         if (wParam == VK_DELETE)
-        {   editor->Removing(wParam);  }
+        {   
+            editor->Removing(wParam);
+            history->Memorize();
+        }
         else if (editor->SystemKey(wParam))
             editor->ReDrawBox();
         break;
@@ -252,8 +257,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         //Edit
         case ID_EDIT_UNDO:
+            history->Undo();
+            editor->ReDrawBox();
             break;
         case ID_EDIT_REDO:
+            history->Redo();
+            editor->ReDrawBox();
             break;
         case ID_EDIT_CUT:
             break;
@@ -268,16 +277,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         // Fonts
         case ID_FONT_ARIAL:
-            if (editor->SetCurrentFont(0))
+            if (editor->SetCurrentFont(0)) {
+                history->Memorize();
                 editor->ReDrawBox();
+            }
             break;
         case ID_FONT_TIMESNEWROMAN:
-            if (editor->SetCurrentFont(1))
+            if (editor->SetCurrentFont(1)) {
+                history->Memorize();
                 editor->ReDrawBox();
+            }
             break;
         case ID_FONT_KRISTENITC:
-            if (editor->SetCurrentFont(2))
+            if (editor->SetCurrentFont(2)) {
+                history->Memorize();
                 editor->ReDrawBox();
+            }
             break;
 
         default:

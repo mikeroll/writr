@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TextBox.h" 
 #include <Commdlg.h>
+#include <string>
 
 TextBox::TextBox(HWND hwnd)
 {
@@ -595,6 +596,28 @@ VOID TextBox::Removing(WPARAM wParam)
     ReDrawBox();
 }
 
+std::wstring TextBox::GetSelection()
+{
+    std::wstring str;
+    if (isSelected)
+    {
+        for (int i = selectStart; i < selectEnd; i++)
+        {
+            str[i] = text[i];
+        }
+        str[selectEnd - selectStart] = '\0';
+        return str;
+    }
+    else return NULL;    
+}
+
+VOID TextBox::InsertString(std::wstring s)
+{
+    for (int i = 0; i < s.size; i++)
+    {
+        InsertChar(s[i]);
+    }
+}
 
 
 EditorState TextBox::GetState()

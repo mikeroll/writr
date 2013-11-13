@@ -92,8 +92,8 @@ public:
     BOOL IsNormalChar(TCHAR ch);
     VOID InsertImage();
     VOID Removing(WPARAM wParam);
-    LPTSTR GetSelection();
-    VOID InsertString(LPTSTR);
+    std::wstring GetSelection();
+    VOID InsertString(std::wstring);
 
     EditorState GetState();
     VOID LoadState(EditorState state);

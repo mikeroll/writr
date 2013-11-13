@@ -2,6 +2,7 @@
 #include "ImageList.h"
 #include <Commdlg.h>
 #include <winbase.h>
+#include <list>
 
 
 ImageList::ImageList()
@@ -14,7 +15,7 @@ ImageList::~ImageList()
 {
 }
 
-/*
+
 BOOL ImageList::LoadImageFromFile(HWND hWnd)
 {
     HBITMAP bmp;
@@ -38,19 +39,31 @@ BOOL ImageList::LoadImageFromFile(HWND hWnd)
 
         
         //insert img to list
-        imgCount++;
+        
         bmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), imgStruct.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  //load from file
-        MT.imgStruct[MT.CaretPos - 1].B = (HBITMAP)LoadImage(GetModuleHandle(NULL), img.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); // загрузка картинки
+        if (bmp)
+        {
+            imgList.insert(imgList.end, bmp);
+            imgCount++;
+            isLoad = true;
+        }
+        else
+        {
+            MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't load image!", MB_OK);
+            isLoad = false;
+        }
+            
+        /*MT.imgStruct[MT.CaretPos - 1].B = (HBITMAP)LoadImage(GetModuleHandle(NULL), img.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); // загрузка картинки
         GetObject(MT.IMG[MT.CaretPos - 1].B, sizeof(BITMAP), &Bitmap);//берем структуру что бы узнать размер
-        MT.IMG[MT.CaretPos - 1].BH = Bitmap.bmHeight; MT.IMG[MT.CaretPos - 1].BW = Bitmap.bmWidth;//размер
-        isLoad = true;
+        MT.IMG[MT.CaretPos - 1].BH = Bitmap.bmHeight; MT.IMG[MT.CaretPos - 1].BW = Bitmap.bmWidth;//размер*/
     }
     else
     {
-        MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't load image!", MB_OK);
+        MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't open image!", MB_OK);
         isLoad = false;
     }
         
     return isLoad;
 }
-*/
+
+

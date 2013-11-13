@@ -6,14 +6,18 @@
 
 class HistoryCtl
 {
+    TextBox *editor;
     INT maxDepth;
+    INT currentStep;
     std::deque<EditorState> history;
 public:
-    HistoryCtl(INT maxDepth);
+    HistoryCtl(TextBox *editor, INT maxDepth);
     ~HistoryCtl();
 
-    INT Memorize(EditorState state);
-    INT Trim(INT index);
+    INT Memorize();
     VOID Clear();
+
+    VOID Undo();
+    VOID Redo();
 };
 

@@ -2,9 +2,11 @@
 #include "HistoryCtl.h"
 
 
-HistoryCtl::HistoryCtl(INT maxDepth)
+HistoryCtl::HistoryCtl(TextBox *editor, INT maxDepth)
 {
+    this->editor = editor;
     this->maxDepth = maxDepth;
+    this->currentStep = -1;
     Clear();
 }
 
@@ -18,21 +20,31 @@ VOID HistoryCtl::Clear()
     history.clear();
 }
 
-INT HistoryCtl::Memorize(EditorState state)
+INT HistoryCtl::Memorize()
 {
-    history.push_back(state);
-    if ((int)history.size() > maxDepth)
+    history.resize(currentStep + 1);
+    history.push_back(editor->GetState());
+    currentStep++;
+    if (currentStep+1 > maxDepth)
     {
         history.pop_front();
+        currentStep--;
     }
     return history.size();
 }
 
-INT HistoryCtl::Trim(INT index)
+VOID HistoryCtl::Undo()
 {
-    if (index <= (int)history.size())
-    {
-        history.resize(index + 1);
+    if (currentStep > 0) {
+        editor->LoadState(history[currentStep-1]);
+        currentStep--;
     }
-    return history.size();
+}
+
+VOID HistoryCtl::Redo()
+{
+    if (currentStep < (int)history.size() - 1) {
+        editor->LoadState(history[currentStep + 1]);
+        currentStep++;
+    }
 }

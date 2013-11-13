@@ -46,8 +46,6 @@ VOID TextBox::InsertChar(char ch)
             text[i + 1] = text[i];
             font[i + 1] = font[i];
         }
-        text[1] = text[0];
-        font[1] = font[0];
         text[caretPos] = (TCHAR)ch;
         font[caretPos] = CurrentFont;
         length++;

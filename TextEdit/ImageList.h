@@ -12,9 +12,6 @@ public:
     BOOL LoadImageFromFile();
     HBITMAP GatImageFromList(int index);
     VOID GetImageSize(SIZE *s, int index);
-    VOID DrawImage(HWND hWnd, int index, int x, int y);
-
-
-    
+    VOID DrawImage(HWND hWnd, int index, int x, int y);    
 };
 

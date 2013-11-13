@@ -8,11 +8,9 @@ ImageList::ImageList()
 {
 }
 
-
 ImageList::~ImageList()
 {
 }
-
 
 BOOL ImageList::LoadImageFromFile()
 {

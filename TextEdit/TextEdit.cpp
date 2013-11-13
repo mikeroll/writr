@@ -221,6 +221,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP:
         editor->MouseUp(lParam);
         break;
+    case WM_MOUSEMOVE:
+        if (editor->isClicked)
+             editor->MouseMove(lParam);
+        break;
     case WM_CHAR:
         if (wParam == VK_BACK)
             editor->Removing(wParam);
@@ -273,6 +277,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         // Insert
         case ID_INSERT_IMAGE:
+            editor->InsertImage();
             break;
 
         // Fonts

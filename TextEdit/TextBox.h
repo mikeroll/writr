@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "ImageList.h"
 
 #define MAX_LENGTH 2000
 
@@ -44,7 +45,6 @@ private:
 
     // Selection control
 
-    BOOL isClicked;
     BOOL isDblClicked;
     BOOL isSelected;
     int selectStart, selectEnd;
@@ -69,8 +69,15 @@ private:
 
     HWND hWnd;
 
+
+    // Image
+
+    int imgCount;
+    ImageList *images;
+
     
 public:
+    BOOL isClicked;
     TextBox(HWND hwnd);
 	~TextBox();
     VOID InsertChar(char ch);
@@ -92,10 +99,11 @@ public:
     BOOL SetCurrentFont(BYTE f);
     VOID SelectWord();
     BOOL IsNormalChar(TCHAR ch);
-    VOID InsertImage();
     VOID Removing(WPARAM wParam);
     std::string GetSelection();
     VOID InsertString(std::string);
+
+    VOID InsertImage();
 
     EditorState GetState();
     VOID LoadState(EditorState state);

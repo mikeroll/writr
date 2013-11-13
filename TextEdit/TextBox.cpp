@@ -28,6 +28,8 @@ TextBox::TextBox(HWND hwnd)
     MEnd = {0,0};
     CurrentFont = 0;
 
+    imgCount = 0;
+    images = new ImageList();
 
     Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
     Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
@@ -38,6 +40,7 @@ TextBox::TextBox(HWND hwnd)
 
 TextBox::~TextBox()
 {
+    delete images;
 }
 
 VOID TextBox::InsertChar(char ch)
@@ -76,6 +79,8 @@ VOID TextBox::ResizeBox(LPARAM lParam)
 
 VOID TextBox::ReDrawBox()
 {
+    BOOL isImage = false;
+    int imgIndex = 0;
     Point Curr = { 0, 0 };
     maxLineHeight = 0;
     HFONT hFont;
@@ -91,25 +96,43 @@ VOID TextBox::ReDrawBox()
     
     for (int i = 0; i < length; i++)
     {
+        isImage = false;
+        imgIndex = 0;
         DestroyCaret();
         Font[font[i]].lfHeight = zoom;
         hFont = CreateFontIndirectW(&Font[font[i]]);
         SelectObject(hdc,hFont);
         GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
         CreateCar(s.cy);
-        if (text[i] != '\r' && text[i] != '@')		//+ font, +image
+        if (text[i] != '\r')		//+ font, +image
         {
-            if (text[i] == '_')
+            if (text[i]=='@')
+            //if (text[i] >= (TCHAR)(0xE000) && text[i] < (TCHAR)(0xF8FF))          //if image
             {
-                CH[0] = ' ';
+                isImage = true;
+                imgIndex = 0;
+                //imgIndex = text[i] - 0xe000;
             }
-            else 
-                CH[0] = text[i];
-            GetTextExtentPoint(hdc, (LPCTSTR)CH, 1, &s);		//get i-char size
-            if (text[i] == '_')
-                s.cx *= 8;
-            if (maxLineHeight < s.cy)
-                maxLineHeight = s.cy;
+
+            if (!isImage)
+            {
+                if (text[i] == '_')
+                {
+                    CH[0] = ' ';
+                }
+                else
+                    CH[0] = text[i];
+                GetTextExtentPoint(hdc, (LPCTSTR)CH, 1, &s);		//get i-char size
+                if (text[i] == '_')
+                    s.cx *= 8;
+                if (maxLineHeight < s.cy)
+                    maxLineHeight = s.cy;
+            }
+            else
+            {
+                images->GetImageSize(&s, imgIndex);
+            }
+            
 
             //TODO: do something with this mess
             //---becouse next letter eat some part of previous...
@@ -121,7 +144,14 @@ VOID TextBox::ReDrawBox()
                 if (caretPos == i)           //Set Caret
                 {	SetCaretPos(Curr.x, Curr.y);  }
 
-                TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                if (!isImage)
+                {
+                    TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                }                    
+                else
+                {
+                    images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
+                }
                 Curr.x += s.cx;
             }
             else
@@ -133,7 +163,14 @@ VOID TextBox::ReDrawBox()
                 if (caretPos == i)      //Set Caret
                 {	SetCaretPos(Curr.x, Curr.y);	}
 
-                TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                if (!isImage)
+                {
+                    TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                }
+                else
+                {
+                    images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
+                }
                 Curr.x += s.cx;
             }
         }
@@ -307,7 +344,7 @@ VOID TextBox::MouseMove(LPARAM lParam)
         {
             isSelected = true;
         }
-        //SelectOrSetCaret(hWnd);
+        SelectOrSetCaret();
     }
 }
 
@@ -616,6 +653,17 @@ VOID TextBox::InsertString(std::string s)
     for (int i = 0; i < s.size(); i++)
     {
         InsertChar(s[i]);
+    }
+}
+
+
+VOID TextBox::InsertImage()
+{
+    if (images->LoadImageFromFile())
+    {
+        InsertChar('@');//((0xe000+imgCount));
+        imgCount++;
+        ReDrawBox();
     }
 }
 

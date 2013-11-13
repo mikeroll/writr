@@ -2,37 +2,19 @@
 #include "TextBox.h" 
 #include <Commdlg.h>
 
-TextBox::TextBox(HWND hwnd)
+TextBox::TextBox(HWND hWnd)
 {
-    hWnd = hwnd;
+    this->hWnd = hWnd;
     
     wall = 0;
     ground = 0;
     maxLineHeight = 0;
 
-    length = 0;
-    caretPos = 0;
-    text[length] = (TCHAR)0;
-    font[length] = 0;
-
-
-    isDblClicked = false;
-    isSelected = false;
-    isClicked = false;
-    
-        
-    selectStart = 0;
-    selectEnd = 0;
-    MStart = {0,0};
-    MEnd = {0,0};
-    CurrentFont = 0;
-
-
     Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
     Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
-    zoom = Font[CurrentFont].lfHeight;//don't write under the Font[]!!!
 
+    ResetState();
 }
 
 TextBox::~TextBox()
@@ -613,4 +595,26 @@ VOID TextBox::LoadState(EditorState state)
     memcpy(text, state.text, sizeof(TCHAR) * length);
     memcpy(font, state.font, sizeof(BYTE) * length);
     this->caretPos = state.caretPos;
+}
+
+VOID TextBox::ResetState()
+{
+    length = 0;
+    caretPos = 0;
+    text[length] = (TCHAR)0;
+    font[length] = 0;
+
+    isDblClicked = false;
+    isSelected = false;
+    isClicked = false;
+
+    selectStart = 0;
+    selectEnd = 0;
+    MStart = { 0, 0 };
+    MEnd = { 0, 0 };
+    CurrentFont = 0;
+
+    zoom = Font[CurrentFont].lfHeight;//don't write under the Font[]!!!
+
+    ReDrawBox();
 }

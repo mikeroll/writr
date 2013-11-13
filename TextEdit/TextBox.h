@@ -98,5 +98,6 @@ public:
 
     EditorState GetState();
     VOID LoadState(EditorState state);
+    VOID ResetState();
 };
 

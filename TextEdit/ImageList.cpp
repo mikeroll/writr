@@ -14,6 +14,7 @@ ImageList::~ImageList()
 {
 }
 
+/*
 BOOL ImageList::LoadImageFromFile(HWND hWnd)
 {
     HBITMAP bmp;
@@ -52,3 +53,4 @@ BOOL ImageList::LoadImageFromFile(HWND hWnd)
         
     return isLoad;
 }
+*/

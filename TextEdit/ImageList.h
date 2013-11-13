@@ -10,7 +10,7 @@ public:
      ImageList();
     ~ImageList();
 
-    VOID LoadImageFromFile(HWND hWnd);
+    //VOID LoadImageFromFile(HWND hWnd);
     
 };
 

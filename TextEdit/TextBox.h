@@ -62,9 +62,15 @@ private:
 	BYTE CurrentFont;
 	LONG zoom;
 
+
+    // Window
+
+    //HWND hWnd;
+
     
 public:
-	TextBox();
+    TextBox();
+    //TextBox(HWND hwnd);
 	~TextBox();
     VOID InsertChar(char ch);
     VOID RemoveChar();
@@ -75,7 +81,7 @@ public:
     BOOL SystemKey(WPARAM wParam,HWND hWnd);
     VOID MoveCar(Direction dir,HWND hWnd);
     VOID CreateCar(HWND hWnd, int height);
-    VOID MouseDown(LPARAM lParam);
+    BOOL MouseDown(HWND hWnd, LPARAM lParam);
     VOID MouseUp(LPARAM lParam, HWND hWnd);
     VOID MouseMove(LPARAM lParam, HWND hWnd);
     VOID SelectOrSetCaret(HWND hWnd);

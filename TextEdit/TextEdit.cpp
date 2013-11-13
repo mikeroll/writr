@@ -211,8 +211,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_RBUTTONDOWN:
         break;
     case WM_LBUTTONDOWN:
-        editor->MouseDown(lParam);
-        editor->ReDrawBox(hWnd);
+        if(editor->MouseDown(hWnd,lParam))
+            editor->ReDrawBox(hWnd);
         break;
     case WM_LBUTTONUP:
         editor->MouseUp(lParam,hWnd);

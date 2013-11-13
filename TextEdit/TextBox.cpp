@@ -2,8 +2,11 @@
 #include "TextBox.h" 
 #include <Commdlg.h>
 
+//TextBox::TextBox(HWND hwnd)
 TextBox::TextBox()
 {
+    //hWnd = hwnd;
+    
     wall = 0;
     ground = 0;
     maxLineHeight = 0;
@@ -259,15 +262,22 @@ VOID TextBox::CreateCar(HWND hWnd, int height)
     CreateCaret(hWnd, NULL, 2, height);	
 }
 
-VOID TextBox::MouseDown(LPARAM lParam)
+BOOL TextBox::MouseDown(HWND hWnd,LPARAM lParam)
 {
+    BOOL redraw = false;
+    if (isSelected)
+        redraw = true;
     MStart.x = LOWORD(lParam);
     MStart.y = HIWORD(lParam);
+    MEnd.x = MStart.x;
+    MEnd.y = MStart.y;
     isClicked = true;
     isDblClicked = false;
     isSelected = false;
     selectStart = 0;
     selectEnd = 0;
+    SelectOrSetCaret(hWnd);
+    return redraw;
 }
 
 VOID TextBox::MouseUp(LPARAM lParam, HWND hWnd)
@@ -360,7 +370,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
                     if (isSelected)
                     {
                         selectStart = i;
-                        filling = true;						
+                        filling = true;
                     }
                 }
                 
@@ -436,6 +446,17 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
         }
     }
     
+    if ((MEnd.y > (Curr.y+s.cy)) || (MEnd.y == Curr.y && MEnd.x > Curr.x))
+    {
+        if (isClicked || isSelected || isDblClicked)
+        {
+            selectEnd = length;
+            caretPos = selectEnd;
+            SetCaretPos(Curr.x,Curr.y);
+        }
+    }
+    
+    /*
     if ((isClicked || isSelected || isDblClicked) && (selectEnd == 0))
     {
         selectEnd = length; //if selected part go trough the end of text
@@ -447,7 +468,7 @@ VOID TextBox::SelectOrSetCaret(HWND hWnd)       //Difference with ReDrawBox(): a
     {
         SetCaretPos(0,0);
         caretPos = 0;
-    }
+    }*/
 
         
 

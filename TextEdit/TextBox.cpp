@@ -347,6 +347,8 @@ VOID TextBox::MouseMove(LPARAM lParam)
 
 VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text not redraw - only selected part
 {
+    BOOL isImage = false;
+    int imgIndex = 0;
     Point Curr = { 0, 0 };
     maxLineHeight = 0;
     SIZE s;
@@ -367,6 +369,8 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
 
     for (int i = 0; i < length; i++)
     {
+        isImage = false;
+        imgIndex = 0;
         DestroyCaret();
         Font[font[i]].lfHeight = zoom;                  //don't touch!
         hFont = CreateFontIndirectW(&Font[font[i]]);    //need for
@@ -381,19 +385,32 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
             filling = false;
         //------------------------------------------
 
-        if (text[i] != '\r' && text[i] != '@')		//+image
+        if (text[i] != '\r')		//+ font, +image
         {
-            if (text[i] == '_')
+            if ((text[i] >> 8) == IMAGE)          //if image
             {
-                CH[0] = ' ';
+                isImage = true;
+                imgIndex = text[i] & IMAGE;
+            }
+
+            if (!isImage)
+            {
+                if (text[i] == '_')
+                {
+                    CH[0] = ' ';
+                }
+                else
+                    CH[0] = text[i];
+                GetTextExtentPoint(hdc, (LPCTSTR)CH, 1, &s);		//get i-char size
+                if (text[i] == '_')
+                    s.cx *= 8;
+                if (maxLineHeight < s.cy)
+                    maxLineHeight = s.cy;
             }
             else
-                CH[0] = text[i];
-            GetTextExtentPoint(hdc, (LPCTSTR)CH, 1, &s);    //get i-char size
-            if (text[i] == '_')
-                s.cx *= 8;
-            if (maxLineHeight < s.cy)
-                maxLineHeight = s.cy;
+            {
+                images->GetImageSize(&s, imgIndex);
+            }
 
             //---
             s.cx += 2;  //Warning: sync. with ReDrawBox()
@@ -427,7 +444,14 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
 
                 if (filling)
                 {
-                    TextOut(hdc, Curr.x, Curr.y, (LPCTSTR)CH, 1);
+                    if (!isImage)
+                    {
+                        TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                    }
+                    else
+                    {
+                        images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
+                    }
                 }
                 Curr.x += s.cx;
             }
@@ -439,7 +463,14 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
 
                 if (filling)
                 {					
-                    TextOut(hdc, Curr.x, Curr.y, (LPCTSTR)CH, 1);
+                    if (!isImage)
+                    {
+                        TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                    }
+                    else
+                    {
+                        images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
+                    }
                 }	
 
                 //just for find caretPos position(<-,->)

@@ -24,7 +24,7 @@ BOOL ImageList::LoadImageFromFile()
     imgStruct.lpstrFile = (LPWSTR)imgName;
     imgStruct.lpstrFile[0] = '\0';
     imgStruct.nMaxFile = sizeof(imgName);
-    imgStruct.lpstrFilter = L"All\0*.*\0Image\0*.jpg\0";
+    imgStruct.lpstrFilter = L"All\0*.*\0Image\0*.bmp\0";
     imgStruct.nFilterIndex = 1;
     imgStruct.lpstrFileTitle = NULL;
     imgStruct.nMaxFileTitle = 0;

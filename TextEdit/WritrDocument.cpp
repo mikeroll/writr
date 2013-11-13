@@ -1,17 +1,20 @@
 #include "stdafx.h"
+#include <atlconv.h>
 
 #include "WritrDocument.h"
 
 
-WritrDocument::WritrDocument(LPCTSTR filename, TextBox *editor)
+WritrDocument::WritrDocument(std::wstring defname, TextBox *editor)
 {
-    this->filename = filename;
+    defaultName = defname;
     this->editor = editor;
+    New();
 }
 
 
 WritrDocument::~WritrDocument()
 {
+
 }
 
 void WritrDocument::CreateManifest()
@@ -23,28 +26,49 @@ void WritrDocument::CreateManifest()
     mf.fontSize = mf.docLen * sizeof(BYTE);
 }
 
-HANDLE WritrDocument::Open()
+std::wstring WritrDocument::CreateDefaultName()
+{
+    std::wstring newname = defaultName;
+    newname.append(std::to_wstring(defNameCounter));
+    newname.append(L".wdoc");
+    defNameCounter++;
+    return newname;
+}
+
+void WritrDocument::SetName(std::wstring filename)
+{
+    wFilename = std::wstring(filename);
+    this->filename = wFilename.c_str();
+}
+
+void WritrDocument::New()
+{
+    SetName(CreateDefaultName());
+    editor->ResetState();
+}
+
+HANDLE WritrDocument::Grab()
 {
     HANDLE hFile = CreateFile(
-        filename,
+        this->filename,
         GENERIC_ALL,
-        0,
+        FILE_SHARE_READ,
         NULL,
         OPEN_ALWAYS,
         FILE_ATTRIBUTE_NORMAL,
         NULL
         );
-    this->hFile = hFile;
     return hFile;
 }
 
-void WritrDocument::Close()
+void WritrDocument::Close(HANDLE hFile)
 {
     CloseHandle(hFile);
 }
 
-void WritrDocument::Flush()
+void WritrDocument::Save()
 {
+    HANDLE hFile = Grab();
     state = editor->GetState();
     SetFilePointer(hFile, 0, NULL, FILE_BEGIN);
     CreateManifest();
@@ -53,14 +77,18 @@ void WritrDocument::Flush()
     WriteFile(hFile, state.text, mf.textSize, &nBytesWritten, NULL);     //Write text
     WriteFile(hFile, state.font, mf.fontSize, &nBytesWritten, NULL);     //Write font data
     SetEndOfFile(hFile);
+    Close(hFile);
 }
 
 void WritrDocument::Load()
 {
+    HANDLE hFile = Grab();
     DWORD nBytesRead;
     ReadFile(hFile, &mf, mfSize, &nBytesRead, NULL);                     //Read manifest
     ReadFile(hFile, state.text, mf.textSize, &nBytesRead, NULL);         //Read text
     ReadFile(hFile, state.font, mf.fontSize, &nBytesRead, NULL);         //Read font data
 	state.length = mf.docLen;
+    editor->ResetState();
     editor->LoadState(state);
+    Close(hFile);
 }

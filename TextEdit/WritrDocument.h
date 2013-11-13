@@ -5,12 +5,16 @@
 
 #pragma once
 
+#include <string>
+
 #include "TextBox.h"
 
 class WritrDocument
 {
+    std::wstring defaultName;
+    int defNameCounter = 0;
+    std::wstring wFilename;
     LPCTSTR filename;
-    HANDLE hFile;
 
     // Manifest
     struct Manifest {
@@ -27,16 +31,20 @@ class WritrDocument
 
     TextBox *editor;
 
+    std::wstring CreateDefaultName();
     void CreateManifest();
+
+    HANDLE Grab();
+    void Close(HANDLE hFile);
 
 public:
 
-    WritrDocument(LPCTSTR filename, TextBox *editor);
+    WritrDocument(std::wstring defname, TextBox *editor);
     ~WritrDocument();
 
-    HANDLE Open();
-    void Close();
-    void Flush();
+    void SetName(std::wstring filename);
+    void New();
+    void Save();
     void Load();
 };
 

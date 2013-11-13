@@ -20,7 +20,7 @@
 HINSTANCE hInst;                                // current instance
 TCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-TCHAR szDocName[MAX_LOADSTRING] = L"utitled-1.wdoc";
+std::wstring baseDocName(L"untitled", 8);
 
 // App data structure
 struct AppState {
@@ -46,7 +46,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 enum FileAction { FA_OPEN, FA_SAVE, FA_ADDIMAGE };
-LPTSTR              ChooseFile(FileAction action);
+std::wstring        ChooseFile(FileAction action);
 
 void    CreatePopup(HWND, LPARAM);
 
@@ -188,7 +188,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
         pState->editor = new TextBox(hWnd);
         pState->history = new HistoryCtl(pState->editor, 5);
-        pState->document = new WritrDocument(szDocName, pState->editor);
+        pState->document = new WritrDocument(baseDocName, pState->editor);
     }
     else
     {
@@ -259,7 +259,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DestroyWindow(hWnd);
             break;
 
-        //Edit
+        // File
+        case ID_FILE_NEW:
+            document->New();
+            break;
+        case ID_FILE_SAVE:
+            document->SetName(ChooseFile(FA_SAVE));
+            document->Save();
+            break;
+        case ID_FILE_OPEN:
+            document->SetName(ChooseFile(FA_OPEN));
+            document->Load();
+            break;
+
+        // Edit
         case ID_EDIT_UNDO:
             history->Undo();
             editor->ReDrawBox();
@@ -380,7 +393,7 @@ void CreatePopup(HWND hWnd, LPARAM lParam)
     DestroyMenu(hMenu);
 }
 
-LPTSTR ChooseFile(FileAction action)
+std::wstring ChooseFile(FileAction action)
 {
     OPENFILENAME ofn = { 0 };
     const DWORD maxFilename = 512;
@@ -402,5 +415,8 @@ LPTSTR ChooseFile(FileAction action)
         GetSaveFileName(&ofn);
     else
         GetOpenFileName(&ofn);
-    return filename;
+
+    std::wstring wFilename = filename;
+
+    return wFilename;
 }

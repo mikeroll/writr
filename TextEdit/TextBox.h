@@ -1,62 +1,71 @@
 #pragma once
+
+#define MAX_LENGTH 2000
+
+struct EditorState
+{
+    TCHAR text[MAX_LENGTH];
+    BYTE font[MAX_LENGTH];
+    UINT length;
+};
+
 class TextBox
 {
 private:
 
-    struct Point
-    {
-        int x;
-        int y;
-    };
-    
+	struct Point
+	{
+		int x;
+		int y;
+	};
+
     // Client Rect
-    
+
     WORD wall;      //right edge of the window
     WORD ground;    //bottom edge of the window
-    RECT r;
+	RECT r;	
 
     //Text and formatting
 
-    static const int MAX_LENGTH = 2000;
     TCHAR text[MAX_LENGTH];
     BYTE font[MAX_LENGTH];
     int length;
-    //TODO: Timg image[MAX_LENGTH];
+    //TODO: std::list<Timg> images;
 
 
     // Caret control
-    
+
     int caretPos;
     LONG maxLineHeight;
     enum Direction { LEFT, RIGHT, UP, DOWN };
 
 
     // Selection control
-    
+
     BOOL isClicked;
     BOOL isDblClicked;
     BOOL isSelected;
     int selectStart, selectEnd;
-    Point MStart, MEnd;     //MouseDown -> Mstart, MouseUp ->Mend 
+    Point MStart, MEnd;     //MouseDown -> Mstart, MouseUp ->Mend
 
 
     // Color
-    
-    COLORREF SelectColor = RGB(78, 221, 110);
+
+	COLORREF SelectColor = RGB(78, 221, 110);
     COLORREF TextColor = COLOR_WINDOWTEXT;
     COLORREF SelectTextColor = RGB(255, 255, 255);
 
 
     // Fonts
-    
+
     LOGFONT Font[3];
-    BYTE CurrentFont;
-    LONG zoom;
-  
+	BYTE CurrentFont;
+	LONG zoom;
+
     
 public:
-    TextBox();
-    ~TextBox();
+	TextBox();
+	~TextBox();
     VOID InsertChar(char ch);
     VOID RemoveChar();
 
@@ -79,9 +88,7 @@ public:
     VOID InsertImage(HWND hWnd);
     VOID Removing(HWND hWnd, WPARAM wParam);
 
-    inline UINT     GetLength()  { return length; }
-    inline UINT     SetLength(UINT n) { length = n; text[n] = (TCHAR)0; return length; }
-    inline LPTSTR   GetTextPtr() { return text; }
-    inline PBYTE    GetFontPtr() { return font; }
+    EditorState GetState();
+    VOID LoadState(EditorState state);
 };
 

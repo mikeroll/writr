@@ -14,20 +14,23 @@ class WritrDocument
 
     // Manifest
     struct Manifest {
-        UINT char_size;
-        UINT doc_len;
-        UINT text_size;
-        UINT font_size;
+        UINT charSize;
+        UINT docLen;
+        UINT textSize;
+        UINT fontSize;
     };
-    UINT mf_size = sizeof(Manifest);
+    UINT mfSize = sizeof(Manifest);
     Manifest mf;
 
     //Data to store
-    TextBox *data;
-    
+    EditorState state;
+
+    TextBox *editor;
+
     void CreateManifest();
 
 public:
+
     WritrDocument(LPCTSTR filename, TextBox *editor);
     ~WritrDocument();
 

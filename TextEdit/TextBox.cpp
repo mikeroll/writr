@@ -46,6 +46,8 @@ VOID TextBox::InsertChar(char ch)
             text[i + 1] = text[i];
             font[i + 1] = font[i];
         }
+        text[1] = text[0];
+        font[1] = font[0];
         text[caretPos] = (TCHAR)ch;
         font[caretPos] = CurrentFont;
         length++;
@@ -576,8 +578,26 @@ VOID TextBox::Removing(HWND hWnd, WPARAM wParam)
                 isDblClicked = false;
                 selectStart = 0;
                 selectEnd = 0;
-            }            
+            }
         }
     }
     ReDrawBox(hWnd);
+}
+
+
+EditorState TextBox::GetState()
+{
+    EditorState state;
+    memcpy(state.text, text, sizeof(TCHAR) * length);
+    memcpy(state.font, font, sizeof(BYTE) * length);
+    state.length = length;
+    return state;
+}
+
+VOID TextBox::LoadState(EditorState state)
+{
+    length = state.length;
+    memcpy(text, state.text, sizeof(TCHAR) * length);
+    memcpy(font, state.font, sizeof(BYTE) * length);
+
 }

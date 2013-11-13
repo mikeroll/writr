@@ -19,11 +19,13 @@
 HINSTANCE hInst;                                // current instance
 TCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+TCHAR szDocName[MAX_LOADSTRING] = L"utitled-1.wdoc";
 
 // App data structure
 struct AppState {
     TextBox *editor;
     HistoryCtl *history;
+    WritrDocument *document;
 };
 
 // Routine for retreiving state
@@ -64,6 +66,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
     AppState *pState = new AppState();
     pState->editor = new TextBox();
     pState->history = new HistoryCtl(pState->editor, 5);
+    pState->document = new WritrDocument(szDocName, pState->editor);
 
     // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow, pState))
@@ -185,10 +188,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     TextBox *editor;
     HistoryCtl *history;
+    WritrDocument *document;
     if (pState != NULL)
     {
         editor = pState->editor;
         history = pState->history;
+        document = pState->document;
     }
     else
         return -1;
@@ -275,6 +280,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         delete editor;
         delete history;
+        delete document;
         PostQuitMessage(0);
         break;
     default:

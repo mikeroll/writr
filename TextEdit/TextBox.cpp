@@ -281,16 +281,19 @@ BOOL TextBox::MouseDown(LPARAM lParam)
 
 VOID TextBox::MouseUp(LPARAM lParam)
 {
+    isClicked = false;
     MEnd.x = LOWORD(lParam);
     MEnd.y = HIWORD(lParam);
     if (MStart.x != MEnd.x || MStart.y != MEnd.y)
     {
-        isSelected = true;		
+        isSelected = true;
     }
-    if (!isDblClicked)
+    if (!isDblClicked && isSelected)
+    {
         SelectOrSetCaret();
+    }        
     else
-        isDblClicked = false;
+        isDblClicked = false;    
 }
 
 VOID TextBox::MouseMove(LPARAM lParam)
@@ -455,27 +458,10 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
         }
     }
     
-    /*
-    if ((isClicked || isSelected || isDblClicked) && (selectEnd == 0))
-    {
-        selectEnd = length; //if selected part go trough the end of text
-        caretPos = selectEnd;
-        SetCaretPos(Curr.x,Curr.y);
-    }
-
-    if ((isClicked && !isSelected) && (selectStart == selectEnd == 0))
-    {
-        SetCaretPos(0,0);
-        caretPos = 0;
-    }*/
-
-        
-
     if (isDblClicked)
         isSelected = true;
 
     SetTextColor(hdc,TextColor);
-    isClicked = false;
     ShowCaret(hWnd);
     ReleaseDC(hWnd, hdc);
 }

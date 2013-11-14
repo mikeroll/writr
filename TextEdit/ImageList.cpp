@@ -37,11 +37,7 @@ BOOL ImageList::LoadImageFromFile(std::wstring filename)
 
 HBITMAP ImageList::GatImageFromList(int index)
 {    
-    std::list<HBITMAP>::iterator iterator;
-    HBITMAP bmp;
-    iterator = imgList.begin();
-    std::advance(iterator, index);
-    bmp = *iterator;
+    HBITMAP bmp = imgList[index];
     return bmp;
 }
 

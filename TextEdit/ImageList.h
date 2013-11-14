@@ -1,9 +1,11 @@
 #pragma once
-#include <list>
+
+#include <vector>
+
 class ImageList
 {
 private:
-    std::list<HBITMAP> imgList;
+    std::vector<HBITMAP> imgList;
 
 public:
      ImageList();

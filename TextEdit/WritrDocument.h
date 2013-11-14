@@ -1,8 +1,3 @@
-/* .wdoc format:
-
-
-*/
-
 #pragma once
 
 #include <string>

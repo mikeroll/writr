@@ -79,6 +79,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Dialogs.h" />
     <ClInclude Include="HistoryCtl.h" />
     <ClInclude Include="ImageList.h" />
     <ClInclude Include="Resource.h" />
@@ -90,6 +91,7 @@
     <ClInclude Include="WritrDocument.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Dialogs.cpp" />
     <ClCompile Include="HistoryCtl.cpp" />
     <ClCompile Include="ImageList.cpp" />
     <ClCompile Include="stdafx.cpp">

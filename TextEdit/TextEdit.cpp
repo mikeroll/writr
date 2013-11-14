@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include <string.h>
-#include <commdlg.h>
 #include <windowsx.h>
 
 #include "TextEdit.h"
@@ -11,9 +10,11 @@
 #include "TextBox.h"
 #include "HistoryCtl.h"
 #include "WritrDocument.h"
+#include "Dialogs.h"
 
 
 #define MAX_LOADSTRING 100
+#define MAX_HISTORY 15
 
 
 // Global Variables:
@@ -44,13 +45,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-
-enum FileAction { FA_OPEN, FA_SAVE, FA_ADDIMAGE };
-std::wstring        ChooseFile(FileAction action);
-
 void    CreatePopup(HWND, LPARAM);
-
-
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -187,7 +182,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         pState = reinterpret_cast<AppState *>(pCreate->lpCreateParams);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
         pState->editor = new TextBox(hWnd);
-        pState->history = new HistoryCtl(pState->editor, 5);
+        pState->history = new HistoryCtl(pState->editor, MAX_HISTORY);
         pState->document = new WritrDocument(baseDocName, pState->editor);
     }
     else
@@ -280,10 +275,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             history->Redo();
             break;
         case ID_EDIT_CUT:
+            if (editor->Cut())
+                history->Memorize();
             break;
         case ID_EDIT_COPY:
+            editor->Copy();
             break;
         case ID_EDIT_PASTE:
+            if (editor->Paste())
+                history->Memorize();
             break;
 
         // Insert
@@ -306,6 +306,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_FONT_KRISTENITC:
             if (editor->SetCurrentFont(2)) {
+                history->Memorize();
+                editor->ReDrawBox();
+            }
+            break;
+        case ID_FONT_CONSOLAS:
+            if (editor->SetCurrentFont(3)) {
                 history->Memorize();
                 editor->ReDrawBox();
             }
@@ -391,30 +397,3 @@ void CreatePopup(HWND hWnd, LPARAM lParam)
     DestroyMenu(hMenu);
 }
 
-std::wstring ChooseFile(FileAction action)
-{
-    OPENFILENAME ofn = { 0 };
-    const DWORD maxFilename = 512;
-    TCHAR filename[maxFilename];
-    filename[0] = (TCHAR)0;
-    TCHAR *filter;
-
-    if (action == FA_ADDIMAGE)
-        filter = L"Bitmap image\0*.bmp\0\0";
-    else
-        filter = L"Writr document\0*.wdoc\0\0";
-
-    ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFile = filename;
-    ofn.nMaxFile = maxFilename;
-    ofn.lpstrFilter = filter;
-
-    if (action == FA_SAVE)
-        GetSaveFileName(&ofn);
-    else
-        GetOpenFileName(&ofn);
-
-    std::wstring wFilename = filename;
-
-    return wFilename;
-}

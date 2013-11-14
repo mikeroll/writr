@@ -35,8 +35,8 @@ INT HistoryCtl::Memorize()
 
 VOID HistoryCtl::Undo()
 {
-    if (currentStep > 0) {
-        editor->LoadState(history[currentStep-1]);
+    if (currentStep >= 0) {
+        editor->LoadState(history[currentStep]);
         currentStep--;
     }
 }

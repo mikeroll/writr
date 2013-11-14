@@ -1,6 +1,7 @@
 #include "stdafx.h"
+
 #include "TextBox.h" 
-#include <Commdlg.h>
+#include "Dialogs.h"
 
 TextBox::TextBox(HWND hWnd)
 {
@@ -13,9 +14,7 @@ TextBox::TextBox(HWND hWnd)
     Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
     Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
-
-    imgCount = 0;
-    images = new ImageList();
+    Font[3] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Consolas") };
 
     ResetState();
 }
@@ -574,7 +573,7 @@ VOID TextBox::ZoomOut()
 BOOL TextBox::SetCurrentFont(BYTE f)
 {
     BOOL redraw = false;
-    if (f >= 0 && f < 3)
+    if (f >= 0 && f < 4)
     {
         if (!isSelected)
             CurrentFont = f;
@@ -646,13 +645,14 @@ VOID TextBox::Removing(WPARAM wParam)
     }
     else
     {
-        if (wParam == VK_BACK)
-        {
-            if (caretPos != 0)
-                caretPos--;
+        if (wParam == VK_BACK) {
+            if (caretPos > 0) caretPos--;
+            RemoveChar();
         }
-        if (wParam == VK_DELETE) {}
-        RemoveChar();
+        if (wParam == VK_DELETE) {
+            RemoveChar();
+        }
+        if (wParam == 0) {}
     }
     ReDrawBox();
 }
@@ -661,10 +661,10 @@ std::wstring TextBox::GetSelection()
 {
     if (isSelected)
     {
-        std::wstring chunk(text[selectStart], selectEnd - selectStart);
+        std::wstring chunk(text, selectStart, selectEnd - selectStart);
         return chunk;
     }
-    else return NULL;
+    else return L"";
 }
 
 VOID TextBox::InsertString(std::wstring s)
@@ -678,7 +678,7 @@ VOID TextBox::InsertString(std::wstring s)
 
 VOID TextBox::InsertImage()
 {
-    if (images->LoadImageFromFile())
+    if (images->LoadImageFromFile(ChooseFile(FA_ADDIMAGE)))
     {
         InsertChar((TCHAR)(0xff00 + imgCount));
         imgCount++;
@@ -731,4 +731,80 @@ VOID TextBox::ResetState()
     zoom = Font[CurrentFont].lfHeight;//don't write under the Font[]!!!
 
     ReDrawBox();
+}
+
+BOOL TextBox::Cut()
+{
+    if (Copy() == false)
+        return false;
+    else
+    {
+        Removing(0);
+        ReDrawBox();
+        return true;
+    }
+}
+
+BOOL TextBox::Copy()
+{
+    std::wstring chunk = GetSelection();
+    if (chunk.empty())
+        return false;
+    else
+    {
+        SaveToClipboard(GetSelection());
+        return true;
+    }
+}
+
+BOOL TextBox::Paste()
+{
+    std::wstring chunk = ReadFromClipboard();
+    if (chunk.empty())
+        return false;
+    else
+    {
+        InsertString(chunk);
+        ReDrawBox();
+        return true;
+    }
+}
+
+void TextBox::SaveToClipboard(const std::wstring &str)
+{
+    if (!OpenClipboard(hWnd))
+    {
+        return;
+    }
+    EmptyClipboard();
+
+    HGLOBAL globalMemDescriptor = GlobalAlloc(GMEM_MOVEABLE, (str.size() + 1) * sizeof(TCHAR));
+    if (globalMemDescriptor != NULL)
+    {
+        LPWSTR stringPtr = (LPWSTR)GlobalLock(globalMemDescriptor);
+        memcpy(stringPtr, str.c_str(), str.size() * sizeof(TCHAR));
+        stringPtr[str.size()] = 0;
+        GlobalUnlock(globalMemDescriptor);
+        SetClipboardData(CF_UNICODETEXT, globalMemDescriptor);
+    }
+    CloseClipboard();
+}
+
+std::wstring TextBox::ReadFromClipboard()
+{
+    if (!IsClipboardFormatAvailable(CF_UNICODETEXT) || !OpenClipboard(hWnd))
+    {
+        return L"";
+    }
+
+    std::wstring result;
+
+    HGLOBAL globalMemDescriptor = GetClipboardData(CF_UNICODETEXT);
+    if (globalMemDescriptor != NULL)
+    {
+        result = (LPWSTR)GlobalLock(globalMemDescriptor);
+        GlobalUnlock(globalMemDescriptor);
+    }
+    CloseClipboard();
+    return result;
 }

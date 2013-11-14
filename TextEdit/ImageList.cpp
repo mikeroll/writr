@@ -1,8 +1,6 @@
 #include "stdafx.h"
-#include "ImageList.h"
-#include <Commdlg.h>
-#include <winbase.h>
 
+#include "ImageList.h"
 
 ImageList::ImageList()
 {
@@ -12,59 +10,32 @@ ImageList::~ImageList()
 {
 }
 
-BOOL ImageList::LoadImageFromFile()
+BOOL ImageList::LoadImageFromFile(std::wstring filename)
 {
-    TCHAR imgName[MAX_PATH];    //file name(used for init.)
     HBITMAP bmp;
-    BOOL isLoad=false;
-    OPENFILENAME  imgStruct;
-    SecureZeroMemory(&imgStruct, sizeof(imgStruct));
-    imgStruct.lStructSize = sizeof (imgStruct);
-    imgStruct.hwndOwner = NULL;
-    imgStruct.lpstrFile = (LPWSTR)imgName;
-    imgStruct.lpstrFile[0] = '\0';
-    imgStruct.nMaxFile = sizeof(imgName);
-    imgStruct.lpstrFilter = L"All\0*.*\0Image\0*.bmp\0";
-    imgStruct.nFilterIndex = 1;
-    imgStruct.lpstrFileTitle = NULL;
-    imgStruct.nMaxFileTitle = 0;
-    imgStruct.lpstrInitialDir = NULL;
-    imgStruct.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-    if (GetOpenFileName(&imgStruct))
+    BOOL isLoaded=false;
+    LPCTSTR file = filename.c_str();
+        
+    //insert img to list
+        
+    bmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), file, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  //load from file
+    if (bmp)
     {
-        MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"Image Successful Inserting", MB_OK);
-
-        
-        //insert img to list
-        
-        bmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), imgStruct.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  //load from file
-        if (bmp)
-        {
-            imgList.insert(imgList.end(), bmp);
-            isLoad = true;
-        }
-        else
-        {
-            MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't load image!", MB_OK);
-            isLoad = false;
-        }
+        imgList.push_back(bmp);
+        isLoaded = true;
     }
     else
     {
-        MessageBox(NULL, (LPCWSTR)imgStruct.lpstrFile, L"ERROR: Couldn't open image!", MB_OK);
-        isLoad = false;
+        MessageBox(NULL, file, L"ERROR: Couldn't load image!", MB_OK);
+        isLoaded = false;
     }
-        
-    return isLoad;
+
+    return isLoaded;
 }
 
 HBITMAP ImageList::GatImageFromList(int index)
 {    
-    std::list<HBITMAP>::iterator iterator;
-    HBITMAP bmp;
-    iterator = imgList.begin();
-    std::advance(iterator, index);
-    bmp = *iterator;
+    HBITMAP bmp = imgList[index];
     return bmp;
 }
 

@@ -16,6 +16,8 @@ TextBox::TextBox(HWND hWnd)
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
     Font[3] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Consolas") };
 
+    images = new ImageList();
+
     ResetState();
 }
 
@@ -700,6 +702,7 @@ VOID TextBox::ResetState()
     CurrentFont = 0;
 
     imgCount = 0;
+    delete images;
     images = new ImageList();
 
     zoom = Font[CurrentFont].lfHeight;//don't write under the Font[]!!!

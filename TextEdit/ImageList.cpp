@@ -1,8 +1,6 @@
 #include "stdafx.h"
-#include "ImageList.h"
-#include <Commdlg.h>
-#include <winbase.h>
 
+#include "ImageList.h"
 
 ImageList::ImageList()
 {

@@ -14,6 +14,8 @@ TextBox::TextBox(HWND hWnd)
     Font[0] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 33, _T("@Arial Unicode MS") };
     Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
+    Font[3] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Consolas") };
+
 
     imgCount = 0;
     images = new ImageList();
@@ -551,7 +553,7 @@ VOID TextBox::ZoomOut()
 BOOL TextBox::SetCurrentFont(BYTE f)
 {
     BOOL redraw = false;
-    if (f >= 0 && f < 3)
+    if (f >= 0 && f < 4)
     {
         if (!isSelected)
             CurrentFont = f;

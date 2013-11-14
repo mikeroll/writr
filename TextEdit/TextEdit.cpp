@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include <string.h>
-#include <commdlg.h>
 #include <windowsx.h>
 
 #include "TextEdit.h"
@@ -308,6 +307,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_FONT_KRISTENITC:
             if (editor->SetCurrentFont(2)) {
+                history->Memorize();
+                editor->ReDrawBox();
+            }
+            break;
+        case ID_FONT_CONSOLAS:
+            if (editor->SetCurrentFont(3)) {
                 history->Memorize();
                 editor->ReDrawBox();
             }

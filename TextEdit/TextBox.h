@@ -1,5 +1,7 @@
 #pragma once
+
 #include <string>
+
 #include "ImageList.h"
 
 #define MAX_LENGTH 2000
@@ -62,7 +64,7 @@ private:
 
     // Fonts
 
-    LOGFONT Font[3];
+    LOGFONT Font[4];
 	BYTE CurrentFont;
 	LONG zoom;
 

@@ -1,6 +1,7 @@
 #include "stdafx.h"
+
 #include "TextBox.h" 
-#include <Commdlg.h>
+#include "Dialogs.h"
 
 TextBox::TextBox(HWND hWnd)
 {
@@ -655,7 +656,7 @@ VOID TextBox::InsertString(std::wstring s)
 
 VOID TextBox::InsertImage()
 {
-    if (images->LoadImageFromFile())
+    if (images->LoadImageFromFile(ChooseFile(FA_ADDIMAGE)))
     {
         InsertChar((TCHAR)(0xff00 + imgCount));
         imgCount++;

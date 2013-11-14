@@ -11,6 +11,7 @@
 #include "TextBox.h"
 #include "HistoryCtl.h"
 #include "WritrDocument.h"
+#include "Dialogs.h"
 
 
 #define MAX_LOADSTRING 100
@@ -43,10 +44,6 @@ BOOL                InitInstance(HINSTANCE, int);
 //BOOL                InitInstance(HINSTANCE, int, AppState *);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
-
-enum FileAction { FA_OPEN, FA_SAVE, FA_ADDIMAGE };
-std::wstring        ChooseFile(FileAction action);
 
 void    CreatePopup(HWND, LPARAM);
 
@@ -280,7 +277,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             history->Redo();
             break;
         case ID_EDIT_CUT:
-            if (editor->Cut());
+            if (editor->Cut())
                 history->Memorize();
             break;
         case ID_EDIT_COPY:
@@ -396,30 +393,3 @@ void CreatePopup(HWND hWnd, LPARAM lParam)
     DestroyMenu(hMenu);
 }
 
-std::wstring ChooseFile(FileAction action)
-{
-    OPENFILENAME ofn = { 0 };
-    const DWORD maxFilename = 512;
-    TCHAR filename[maxFilename];
-    filename[0] = (TCHAR)0;
-    TCHAR *filter;
-
-    if (action == FA_ADDIMAGE)
-        filter = L"Bitmap image\0*.bmp\0\0";
-    else
-        filter = L"Writr document\0*.wdoc\0\0";
-
-    ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFile = filename;
-    ofn.nMaxFile = maxFilename;
-    ofn.lpstrFilter = filter;
-
-    if (action == FA_SAVE)
-        GetSaveFileName(&ofn);
-    else
-        GetOpenFileName(&ofn);
-
-    std::wstring wFilename = filename;
-
-    return wFilename;
-}

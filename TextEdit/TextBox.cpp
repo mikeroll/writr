@@ -14,6 +14,9 @@ TextBox::TextBox(HWND hWnd)
     Font[1] = { -16, 0, 0, 0, 400, 0, 0, 0, 204, 3, 2, 1, 18, _T("Times New Roman") };
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
 
+    imgCount = 0;
+    images = new ImageList();
+
     ResetState();
 }
 
@@ -278,6 +281,7 @@ VOID TextBox::CreateCar(int height)
 
 BOOL TextBox::MouseDown(LPARAM lParam)
 {
+    isMouseMove = false;
     BOOL redraw = false;
     if (isSelected)
         redraw = true;
@@ -297,8 +301,8 @@ BOOL TextBox::MouseDown(LPARAM lParam)
 VOID TextBox::MouseUp(LPARAM lParam)
 {
     isClicked = false;
-    MEnd.x = LOWORD(lParam);
-    MEnd.y = HIWORD(lParam);
+    //MEnd.x = LOWORD(lParam);
+    //MEnd.y = HIWORD(lParam);
     if (MStart.x != MEnd.x || MStart.y != MEnd.y)
     {
         isSelected = true;
@@ -309,10 +313,12 @@ VOID TextBox::MouseUp(LPARAM lParam)
     }        
     else
         isDblClicked = false;    
+    isMouseMove = false;
 }
 
 VOID TextBox::MouseMove(LPARAM lParam)
 {
+    isMouseMove = true;
     if (isClicked)
     {
         MEnd.x = LOWORD(lParam);
@@ -340,12 +346,18 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
     HideCaret(hWnd);
     bool filling = false;
 
+    Font[CurrentFont].lfHeight = zoom;                  //don't touch!
+    hFont = CreateFontIndirectW(&Font[CurrentFont]);    //need for
+    SelectObject(hdc, hFont);
+
     if (isSelected || isDblClicked)		///if text selected
     {
         SetBkColor(hdc, SelectColor);
         SetTextColor(hdc,SelectTextColor);
         swap(&MStart,&MEnd);		//if necessary
     }
+
+    DeleteObject(hFont);
 
     for (int i = 0; i < length; i++)
     {
@@ -399,11 +411,21 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
             if ((Curr.x + s.cx) < wall)     //if within the window, then print, else -> \r
             {
                 //if current point is start of selecting part, then filling->true
-                if (isSelected && (Curr.x <= MStart.x && MStart.x < (Curr.x + s.cx)) && (Curr.y <= MStart.y && MStart.y < (Curr.y + maxLineHeight)))
+                if ((isSelected || isClicked) && (Curr.x <= MStart.x && MStart.x < (Curr.x + s.cx)) && (Curr.y <= MStart.y && MStart.y < (Curr.y + maxLineHeight)))
                 {
-                    if (isSelected)
+                    if (isSelected || isClicked)
                     {
-                        selectStart = i;
+                        if (!isMouseMove)
+                            selectStart = i;
+                        if (isSelected && !isClicked)   //when MouseUp
+                        {
+                            if (i < selectStart)
+                            {
+                                selectEnd=selectStart;
+                                selectStart = i;
+                                break;
+                            }
+                        }
                         filling = true;
                     }
                 }
@@ -514,8 +536,13 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
 
 VOID TextBox::swap(Point *a, Point *b)
 {
+    SIZE s;
+    HDC hdc = GetDC(hWnd);
+    GetTextExtentPoint(hdc, (LPCTSTR)"A", 1, &s);
+    ReleaseDC(hWnd, hdc);
+
     Point p;
-    if ((*a).y > (*b).y || (((*a).y == (*b).y) && ((*a).x > (*b).x)))
+    if ((*a).y > ((*b).y + s.cy) || (((*a).y <= ((*b).y + s.cy)) && ((*a).x > (*b).x)))
     {
         p.x = (*a).x;
         p.y = (*a).y;
@@ -605,67 +632,44 @@ BOOL TextBox::IsNormalChar(TCHAR ch)
 
 VOID TextBox::Removing(WPARAM wParam)
 {
-    if (wParam == VK_DELETE)
+    if (isSelected)
     {
-        if (!isSelected)
+        caretPos = selectStart;
+        for (int i = 0; i < selectEnd - selectStart; i++)
+        {
             RemoveChar();
-        else
-        {
-            caretPos = selectStart;
-            for (int i = 0; i < selectEnd - selectStart; i++)
-            {
-                RemoveChar();
-            }
-            isSelected = false;
-            isDblClicked = false;
-            selectStart = 0;
-            selectEnd = 0;
         }
+        isSelected = false;
+        isDblClicked = false;
+        selectStart = 0;
+        selectEnd = 0;
     }
-    else if (wParam == VK_BACK)
+    else
     {
-        if (caretPos != 0)
+        if (wParam == VK_BACK)
         {
-            if (!isSelected)
-            {
+            if (caretPos != 0)
                 caretPos--;
-                RemoveChar();
-            }              
-            else
-            {
-                caretPos = selectStart;
-                for (int i = 0; i < selectEnd - selectStart; i++)
-                {
-                    RemoveChar();
-                }
-                isSelected = false;
-                isDblClicked = false;
-                selectStart = 0;
-                selectEnd = 0;
-            }
         }
+        if (wParam == VK_DELETE) {}
+        RemoveChar();
     }
     ReDrawBox();
 }
 
-std::string TextBox::GetSelection()
+std::wstring TextBox::GetSelection()
 {
-    std::string str;
     if (isSelected)
     {
-        for (int i = selectStart; i < selectEnd; i++)
-        {
-            str[i] = (CHAR)text[i];
-        }
-        str[selectEnd - selectStart] = '\0';
-        return str;
+        std::wstring chunk(text[selectStart], selectEnd - selectStart);
+        return chunk;
     }
-    else return NULL;    
+    else return NULL;
 }
 
-VOID TextBox::InsertString(std::string s)
+VOID TextBox::InsertString(std::wstring s)
 {
-    for (int i = 0; i < s.size(); i++)
+    for (int i = 0; i < (int)s.size(); i++)
     {
         InsertChar(s[i]);
     }
@@ -712,12 +716,14 @@ VOID TextBox::ResetState()
     isDblClicked = false;
     isSelected = false;
     isClicked = false;
+    isMouseMove = false;
 
     selectStart = 0;
     selectEnd = 0;
     MStart = { 0, 0 };
     MEnd = { 0, 0 };
     CurrentFont = 0;
+
 
     imgCount = 0;
     images = new ImageList();

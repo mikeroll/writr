@@ -50,6 +50,7 @@ private:
     BOOL isDblClicked;
     BOOL isSelected;
     int selectStart, selectEnd;
+    BOOL isMouseMove;
     Point MStart, MEnd;     //MouseDown -> Mstart, MouseUp ->Mend
 
 
@@ -102,8 +103,8 @@ public:
     VOID SelectWord();
     BOOL IsNormalChar(TCHAR ch);
     VOID Removing(WPARAM wParam);
-    std::string GetSelection();
-    VOID InsertString(std::string);
+    std::wstring GetSelection();
+    VOID InsertString(std::wstring);
 
     VOID InsertImage();
 

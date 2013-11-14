@@ -638,10 +638,10 @@ std::wstring TextBox::GetSelection()
 {
     if (isSelected)
     {
-        std::wstring chunk(text[selectStart], selectEnd - selectStart);
+        std::wstring chunk(text, selectStart, selectEnd - selectStart);
         return chunk;
     }
-    else return NULL;
+    else return L"";
 }
 
 VOID TextBox::InsertString(std::wstring s)
@@ -706,4 +706,80 @@ VOID TextBox::ResetState()
     zoom = Font[CurrentFont].lfHeight;//don't write under the Font[]!!!
 
     ReDrawBox();
+}
+
+BOOL TextBox::Cut()
+{
+    if (Copy() == false)
+        return false;
+    else
+    {
+        Removing(0);
+        ReDrawBox();
+        return true;
+    }
+}
+
+BOOL TextBox::Copy()
+{
+    std::wstring chunk = GetSelection();
+    if (chunk.empty())
+        return false;
+    else
+    {
+        SaveToClipboard(GetSelection());
+        return true;
+    }
+}
+
+BOOL TextBox::Paste()
+{
+    std::wstring chunk = ReadFromClipboard();
+    if (chunk.empty())
+        return false;
+    else
+    {
+        InsertString(chunk);
+        ReDrawBox();
+        return true;
+    }
+}
+
+void TextBox::SaveToClipboard(const std::wstring &str)
+{
+    if (!OpenClipboard(hWnd))
+    {
+        return;
+    }
+    EmptyClipboard();
+
+    HGLOBAL globalMemDescriptor = GlobalAlloc(GMEM_MOVEABLE, (str.size() + 1) * sizeof(TCHAR));
+    if (globalMemDescriptor != NULL)
+    {
+        LPWSTR stringPtr = (LPWSTR)GlobalLock(globalMemDescriptor);
+        memcpy(stringPtr, str.c_str(), str.size() * sizeof(TCHAR));
+        stringPtr[str.size()] = 0;
+        GlobalUnlock(globalMemDescriptor);
+        SetClipboardData(CF_UNICODETEXT, globalMemDescriptor);
+    }
+    CloseClipboard();
+}
+
+std::wstring TextBox::ReadFromClipboard()
+{
+    if (!IsClipboardFormatAvailable(CF_UNICODETEXT) || !OpenClipboard(hWnd))
+    {
+        return L"";
+    }
+
+    std::wstring result;
+
+    HGLOBAL globalMemDescriptor = GetClipboardData(CF_UNICODETEXT);
+    if (globalMemDescriptor != NULL)
+    {
+        result = (LPWSTR)GlobalLock(globalMemDescriptor);
+        GlobalUnlock(globalMemDescriptor);
+    }
+    CloseClipboard();
+    return result;
 }

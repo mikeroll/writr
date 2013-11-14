@@ -107,6 +107,13 @@ public:
 
     VOID InsertImage();
 
+    void TextBox::SaveToClipboard(const std::wstring &str);
+    std::wstring TextBox::ReadFromClipboard();
+
+    BOOL Cut();
+    BOOL Copy();
+    BOOL Paste();
+
     EditorState GetState();
     VOID LoadState(EditorState state);
     VOID ResetState();

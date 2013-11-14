@@ -280,10 +280,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             history->Redo();
             break;
         case ID_EDIT_CUT:
+            if (editor->Cut());
+                history->Memorize();
             break;
         case ID_EDIT_COPY:
+            editor->Copy();
             break;
         case ID_EDIT_PASTE:
+            if (editor->Paste())
+                history->Memorize();
             break;
 
         // Insert

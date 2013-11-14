@@ -14,6 +14,7 @@
 
 
 #define MAX_LOADSTRING 100
+#define MAX_HISTORY 15
 
 
 // Global Variables:
@@ -45,8 +46,6 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 void    CreatePopup(HWND, LPARAM);
-
-
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -183,7 +182,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         pState = reinterpret_cast<AppState *>(pCreate->lpCreateParams);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
         pState->editor = new TextBox(hWnd);
-        pState->history = new HistoryCtl(pState->editor, 5);
+        pState->history = new HistoryCtl(pState->editor, MAX_HISTORY);
         pState->document = new WritrDocument(baseDocName, pState->editor);
     }
     else

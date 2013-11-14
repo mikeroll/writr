@@ -112,6 +112,8 @@ VOID TextBox::ReDrawBox()
             else
             {
                 images->GetImageSize(&s, imgIndex);
+                if (maxLineHeight < s.cy)
+                    maxLineHeight = s.cy;
             }
 
 
@@ -296,6 +298,14 @@ BOOL TextBox::MouseDown(LPARAM lParam)
     selectStart = 0;
     selectEnd = 0;
     SelectOrSetCaret();
+
+    if ((text[caretPos] >> 8) == IMAGE)
+    {
+        onImage = true;
+        imgStartPos = caretPos;
+    }
+        
+
     return redraw;
 }
 
@@ -304,7 +314,7 @@ VOID TextBox::MouseUp(LPARAM lParam)
     isClicked = false;
     //MEnd.x = LOWORD(lParam);
     //MEnd.y = HIWORD(lParam);
-    if (MStart.x != MEnd.x || MStart.y != MEnd.y)
+    if ( !onImage && (MStart.x != MEnd.x || MStart.y != MEnd.y))
     {
         isSelected = true;
     }
@@ -315,6 +325,19 @@ VOID TextBox::MouseUp(LPARAM lParam)
     else
         isDblClicked = false;    
     isMouseMove = false;
+    if (onImage)
+    {
+        int img=0;
+        img = text[imgStartPos];
+        caretPos = imgStartPos;
+        RemoveChar();
+        caretPos = imgEndPos;
+        InsertChar(img);
+        onImage = false;
+        imgStartPos = 0;
+        imgEndPos = 0;
+        ReDrawBox();
+    }
 }
 
 VOID TextBox::MouseMove(LPARAM lParam)
@@ -324,11 +347,18 @@ VOID TextBox::MouseMove(LPARAM lParam)
     {
         MEnd.x = LOWORD(lParam);
         MEnd.y = HIWORD(lParam);
-        if (MStart.x != MEnd.x && MStart.y != MEnd.y)
+        if (!onImage)
         {
-            isSelected = true;
-        }
+            if (MStart.x != MEnd.x && MStart.y != MEnd.y)
+            {
+                isSelected = true;
+            }
+        }        
         SelectOrSetCaret();
+        if (onImage)
+        {
+            imgEndPos = caretPos;
+        }
     }
 }
 
@@ -403,6 +433,8 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
             else
             {
                 images->GetImageSize(&s, imgIndex);
+                if (maxLineHeight < s.cy)
+                    maxLineHeight = s.cy;
             }
 
             //---
@@ -517,15 +549,20 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
         }
     }
     
-    if ((MEnd.y > (Curr.y+s.cy)) || (MEnd.y == Curr.y && MEnd.x > Curr.x))
+
+    if (isSelected && (selectEnd == selectStart))
     {
-        if (isClicked || isSelected || isDblClicked)
+        if ((MEnd.y > (Curr.y + s.cy)) || ((MEnd.y <= (Curr.y + s.cy)) && (MEnd.x > Curr.x)))
         {
-            selectEnd = length;
-            caretPos = selectEnd;
-            SetCaretPos(Curr.x,Curr.y);
+            if (isClicked || isSelected || isDblClicked)
+            {
+                selectEnd = length;
+                caretPos = selectEnd;
+                SetCaretPos(Curr.x, Curr.y);
+            }
         }
     }
+    
     
     if (isDblClicked)
         isSelected = true;
@@ -724,6 +761,10 @@ VOID TextBox::ResetState()
     isSelected = false;
     isClicked = false;
     isMouseMove = false;
+    onImage = false;
+
+    imgStartPos=0;
+    imgEndPos=0;
 
     selectStart = 0;
     selectEnd = 0;

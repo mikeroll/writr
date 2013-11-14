@@ -50,6 +50,7 @@ private:
     // Selection control
 
     BOOL isDblClicked;
+    BOOL onImage;
     BOOL isSelected;
     int selectStart, selectEnd;
     BOOL isMouseMove;
@@ -79,6 +80,8 @@ private:
 
     int imgCount;
     ImageList *images;
+    int imgStartPos;
+    int imgEndPos;
 
     
 public:

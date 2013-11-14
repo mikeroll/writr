@@ -59,6 +59,11 @@ VOID ImageList::DrawImage(HWND hWnd, int index,int x, int y)
     DeleteDC(imageDc);
 }
 
+VOID ImageList::RemoveImage()
+{
+    imgList.erase(imgList.end());
+}
+
 
 
 

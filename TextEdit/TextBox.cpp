@@ -140,7 +140,8 @@ VOID TextBox::ReDrawBox()
             else
             {
                 Curr.y += maxLineHeight;
-                maxLineHeight = 0;      //new line -> counter=0
+                if (!isImage)
+                    maxLineHeight = 0;      //new line -> counter=0
                 Curr.x = 0;
 
                 if (caretPos == i)      //Set Caret
@@ -148,9 +149,9 @@ VOID TextBox::ReDrawBox()
 
                 if (!isImage)
                 {
-                TextOut(hdc, Curr.x, Curr.y, CH, 1);
+                    TextOut(hdc, Curr.x, Curr.y, CH, 1);
                 }
-                else
+                else if ((Curr.x+s.cx)<wall)
                 {
                     images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
                 }
@@ -493,7 +494,8 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
             else
             {
                 Curr.y += maxLineHeight;
-                maxLineHeight = 0;      //new line -> counter=0
+                if (!isImage)
+                    maxLineHeight = 0;      //new line -> counter=0
                 Curr.x = 0;
 
                 if (filling)
@@ -502,7 +504,7 @@ VOID TextBox::SelectOrSetCaret()       //Difference with ReDrawBox(): all text n
                     {
                         TextOut(hdc, Curr.x, Curr.y, CH, 1);
                     }
-                    else
+                    else if ((Curr.x+s.cx)<wall)
                     {
                         images->DrawImage(hWnd, imgIndex, Curr.x, Curr.y);
                     }
@@ -724,9 +726,20 @@ VOID TextBox::InsertImage()
 {
     if (images->LoadImageFromFile(ChooseFile(FA_ADDIMAGE)))
     {
-        InsertChar((TCHAR)(0xff00 + imgCount));
-        imgCount++;
-        ReDrawBox();
+        SIZE s;
+        images->GetImageSize(&s, imgCount);
+        if (s.cx < wall)
+        {
+            InsertChar((TCHAR)(0xff00 + imgCount));
+            imgCount++;
+            ReDrawBox();
+        }
+        else
+        {
+            MessageBox(NULL, L"This image is too large!", L"Error", MB_OK);
+            imgCount++;
+        }
+        
     }
 }
 

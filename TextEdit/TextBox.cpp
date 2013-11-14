@@ -16,9 +16,6 @@ TextBox::TextBox(HWND hWnd)
     Font[2] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Kristen ITC") };
     Font[3] = { -16, 0, 0, 0, 400, 0, 0, 0, 0, 3, 2, 1, 66, _T("Consolas") };
 
-    imgCount = 0;
-    images = new ImageList();
-
     ResetState();
 }
 

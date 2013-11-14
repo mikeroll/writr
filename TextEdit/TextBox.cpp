@@ -647,9 +647,14 @@ VOID TextBox::Removing(WPARAM wParam)
     }
     else
     {
-        if (wParam == VK_BACK) {
-            if (caretPos > 0) caretPos--;
-            RemoveChar();
+        if (wParam == VK_BACK) 
+        {
+            if (caretPos > 0)
+            {
+                caretPos--;
+                RemoveChar();
+            }
+                
         }
         if (wParam == VK_DELETE) {
             RemoveChar();
